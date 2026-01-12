@@ -136,7 +136,12 @@ public class Region {
 
         GeometricShapeFactory shape = new GeometricShapeFactory();
         shape.setCentre(new Coordinate(lon, lat));
-        shape.setSize(2 * rad);
+
+        double widthInDegrees = rad / (40075000 * Math.cos(Math.toRadians(lat)) / 360);
+        double heightInDegrees = rad / 111320d;
+        shape.setWidth(widthInDegrees);
+        shape.setHeight(heightInDegrees);
+
         shape.setNumPoints(36);
 
         this.geometry = shape.createCircle();
