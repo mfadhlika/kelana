@@ -25,6 +25,10 @@ public class RegionService {
     }
 
     public List<Region> fetchRegions(int userId) {
-        return regionRepository.fetchRegions(userId);
+        try {
+            return regionRepository.fetchRegions(userId);
+        } catch (DataAccessException e) {
+            throw new InternalErrorException(e.getMessage());
+        }
     }
 }

@@ -36,7 +36,6 @@ public class RegionRepository {
             try {
                 geocode = mapper.readValue(geocodeIS, FeatureCollection.class);
             } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }
         byte[] point = rs.getBytes("geometry");
