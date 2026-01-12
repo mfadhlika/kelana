@@ -298,9 +298,15 @@ export function MapLayers({
             </Marker>}
         {showRegions && regions && <FeatureGroup>
             {regions?.features.filter((_, i) => i > 0).map(feature => {
-                const lines = turf.getCoords(feature as Feature<LineString>).map(([lon, lat]) => [lat, lon]);
-                const polygon = turf.lineToPolygon(turf.lineString(lines));
-                return <PolygonL positions={turf.getCoords(polygon as Feature<Polygon>)} />
+                let positions;
+                if (feature.geometry.type == 'LineString') {
+                    const lines = turf.getCoords(turf.flip(feature));
+                    const polygon = turf.lineToPolygon(turf.lineString(lines));
+                    positions = turf.getCoords(polygon as Feature<Polygon>);
+                } else {
+                    positions = turf.getCoords(turf.flip(feature));
+                }
+                return <PolygonL positions={positions} />
             })}
         </FeatureGroup>}
     </>);
