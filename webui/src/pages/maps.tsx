@@ -4,12 +4,12 @@ import type { DateRange } from "react-day-picker";
 import { DatePicker } from "@/components/date-picker.tsx";
 import { DeviceSelect } from "@/components/device-select.tsx";
 import { MapLayers } from "@/components/map-layers";
-import type { Feature, FeatureCollection, Point } from "geojson";
+import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
 import { LayerCheckbox, useLayerState } from "@/components/layer-checkbox";
 import * as turf from "@turf/turf";
-import type { PointProperties } from "@/types/properties";
+import type { PointProperties, RegionProperties } from "@/types/properties";
 import { MapContainer } from 'react-leaflet/MapContainer';
 import { TileLayer } from 'react-leaflet';
 import { Header } from '@/components/header';
@@ -20,6 +20,7 @@ import type { LatLngBounds } from 'leaflet';
 import { Button } from '@/components/ui/button';
 import { locationService } from '@/services/location-service';
 import { useAuthStore } from '@/hooks/use-auth';
+import { regionService } from '@/services/region-service';
 
 export default function MapsPage() {
     const { userInfo } = useAuthStore();
@@ -28,6 +29,15 @@ export default function MapsPage() {
     const [{ date, device, bounds }, setFilter] = useLocationFilter();
     const [bounded, setBounded] = useState<boolean>(bounds != undefined);
     const layerSettings = useLayerState();
+    const [regions, setRegions] = useState<FeatureCollection<LineString, RegionProperties> | undefined>();
+
+    useEffect(() => {
+        if (!layerSettings.showRegions) return;
+
+        regionService.fetchRegions()
+            .then(res => setRegions(res.data))
+            .catch(err => toast.error(`failed to fetch regions: ${err}`));
+    }, [layerSettings.showRegions]);
 
     useEffect(() => {
         const params = new URLSearchParams();
@@ -125,7 +135,7 @@ export default function MapsPage() {
                 <MapControl position='bottomright'>
                     <LayerCheckbox className='bg-sidebar' {...layerSettings} />
                 </MapControl>
-                <MapLayers locations={locations} lastKnowLocation={lastKnownLocation} bounded={bounded} onBoundsChange={handleBounds} {...layerSettings} />
+                <MapLayers locations={locations} lastKnowLocation={lastKnownLocation} regions={regions} bounded={bounded} onBoundsChange={handleBounds} {...layerSettings} />
             </MapContainer>
         </div >
     )

@@ -49,4 +49,12 @@ type GeocodeProperties = {
     state: string
 }
 
-export type { PointProperties, LineStringProperties, TripProperties };
+type RegionProperties = {
+    desc: string,
+    rid?: string,
+    beaconUUID?: UUID,
+    beaconMajor?: number,
+    beaconMinor?: number
+}
+
+export type { PointProperties, LineStringProperties, TripProperties, RegionProperties };

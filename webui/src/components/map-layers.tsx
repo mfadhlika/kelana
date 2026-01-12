@@ -1,7 +1,7 @@
-import type { Feature, FeatureCollection, LineString, Point } from "geojson";
-import { FeatureGroup, CircleMarker, Popup, Polyline, Tooltip, Marker, useMap } from "react-leaflet";
+import type { Feature, FeatureCollection, LineString, Point, Polygon } from "geojson";
+import { FeatureGroup, CircleMarker, Popup, Polyline, Tooltip, Marker, useMap, Polygon as PolygonL } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
-import type { LineStringProperties, PointProperties } from "@/types/properties";
+import type { LineStringProperties, PointProperties, RegionProperties } from "@/types/properties";
 import * as turf from "@turf/turf";
 import type { Checked } from "@/types/checked";
 import L, { LatLngBounds, type LatLngBoundsExpression } from "leaflet";
@@ -16,12 +16,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 export type MarkersProps = React.ComponentProps<"div"> & {
     locations: FeatureCollection<Point, PointProperties>,
     lastKnowLocation?: Feature<Point, PointProperties>,
+    regions?: FeatureCollection<LineString, RegionProperties>,
     zoom?: number,
     showPoints?: Checked,
     showLines?: Checked,
     showLastKnown?: Checked,
     showMovingPoints?: Checked,
     showTimeline?: Checked,
+    showRegions?: Checked,
     bounded: boolean,
     onBoundsChange: (bounds: LatLngBounds) => void
 }
@@ -80,7 +82,18 @@ type Layers = {
     visits: Visit[]
 }
 
-export function MapLayers({ locations, showLines, showPoints, showMovingPoints, showLastKnown, lastKnowLocation, showTimeline: showTimeline, bounded, onBoundsChange }: MarkersProps) {
+export function MapLayers({
+    locations,
+    regions,
+    showLines,
+    showPoints,
+    showMovingPoints,
+    showLastKnown,
+    lastKnowLocation,
+    showTimeline,
+    showRegions,
+    bounded,
+    onBoundsChange }: MarkersProps) {
     const { userInfo } = useAuthStore();
     const isMobile = useIsMobile();
     const map = useMap();
@@ -283,5 +296,12 @@ export function MapLayers({ locations, showLines, showPoints, showMovingPoints, 
                 <MarkerPopup {...lastKnowLocation.properties} />
                 <Tooltip>{formatDistanceToNow(new Date(lastKnowLocation.properties.timestamp))} ago</Tooltip>
             </Marker>}
+        {showRegions && regions && <FeatureGroup>
+            {regions?.features.filter((_, i) => i > 0).map(feature => {
+                const lines = turf.getCoords(feature as Feature<LineString>).map(([lon, lat]) => [lat, lon]);
+                const polygon = turf.lineToPolygon(turf.lineString(lines));
+                return <PolygonL positions={turf.getCoords(polygon as Feature<Polygon>)} />
+            })}
+        </FeatureGroup>}
     </>);
 }

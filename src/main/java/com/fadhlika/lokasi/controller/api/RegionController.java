@@ -16,7 +16,7 @@ import com.fadhlika.lokasi.model.User;
 import com.fadhlika.lokasi.service.RegionService;
 
 @RestController
-@RequestMapping("/api/v1/region")
+@RequestMapping("/api/v1/regions")
 public class RegionController {
     @Autowired
     private RegionService regionService;

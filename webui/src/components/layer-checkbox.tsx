@@ -11,6 +11,7 @@ export type LayerState = React.ComponentProps<"div"> & {
     showLastKnown: Checked,
     showMovingPoints: Checked,
     showTimeline: Checked,
+    showRegions: Checked,
 }
 
 export const useLayerState = create<LayerState>()((
@@ -20,7 +21,8 @@ export const useLayerState = create<LayerState>()((
             showPoints: true as Checked,
             showLastKnown: true as Checked,
             showMovingPoints: false as Checked,
-            showTimeline: false as Checked
+            showTimeline: false as Checked,
+            showRegions: true as Checked,
         }),
         {
             name: 'layer-storage',
@@ -29,12 +31,13 @@ export const useLayerState = create<LayerState>()((
     )
 ));
 
-export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMovingPoints, showTimeline, className }: LayerState) => {
+export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMovingPoints, showTimeline, showRegions, className }: LayerState) => {
     const setShowPoints = (value: Checked) => useLayerState.setState((state) => ({ ...state, showPoints: value }));
     const setShowLines = (value: Checked) => useLayerState.setState((state) => ({ ...state, showLines: value }));
     const setShowLastKnown = (value: Checked) => useLayerState.setState((state) => ({ ...state, showLastKnown: value }));
     const setshowMovingPoints = (value: Checked) => useLayerState.setState((state) => ({ ...state, showMovingPoints: value }));
     const setShowTimeline = (value: Checked) => useLayerState.setState((state) => ({ ...state, showTimeline: value }));
+    const setshowRegions = (value: Checked) => useLayerState.setState((state) => ({ ...state, showRegions: value }));
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -73,6 +76,12 @@ export const LayerCheckbox = ({ showLines, showPoints, showLastKnown, showMoving
                     onCheckedChange={setShowTimeline}
                 >
                     Timeline
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                    checked={showRegions}
+                    onCheckedChange={setshowRegions}
+                >
+                    Region
                 </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
         </DropdownMenu>
