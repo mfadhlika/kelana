@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import type { Integration } from "@/types/integration";
 import type { Response } from "@/types/response";
 import { useAuthStore } from "@/hooks/use-auth";
+import { backupService } from "@/services/backup-service";
 
 const accountFormSchema = z.object({
     username: z.string(),
@@ -241,6 +242,40 @@ function IntegrationSettingsTab() {
     );
 }
 
+function BackupSettingsTab() {
+    const createBackup = () => {
+        backupService.createBackup().then(() => {
+            toast.info("Backup successfully created");
+        }).catch(() => {
+            toast.error("Failed to create backup");
+        })
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>System</CardTitle>
+                <CardDescription>
+                    Configure system here.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-6">
+                <Accordion type="multiple">
+                    <AccordionItem value="backup">
+                        <AccordionTrigger>Backup</AccordionTrigger>
+                        <AccordionContent>
+                            <div style={{ "width": "100%", "display": "flex", "justifyContent": "space-between" }}>
+                                <span>Create backup</span>
+                                <Button onClick={createBackup}>Backup</Button>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+            </CardContent>
+        </Card>
+    );
+}
+
 export default function SettingsPage() {
     return (
         <Tabs defaultValue="account" className="w-full">
@@ -248,13 +283,19 @@ export default function SettingsPage() {
                 <TabsList>
                     <TabsTrigger value="account">Account</TabsTrigger>
                     <TabsTrigger value="integration">Integration</TabsTrigger>
+                    <TabsTrigger value="system">System</TabsTrigger>
                 </TabsList>
             </Header>
             <div className="pr-4 pl-4">
                 <TabsContent value="account">
                     <AccountSettingsTab />
                 </TabsContent>
-                <TabsContent value="integration"><IntegrationSettingsTab /></TabsContent>
+                <TabsContent value="integration">
+                    <IntegrationSettingsTab />
+                </TabsContent>
+                <TabsContent value="system">
+                    <BackupSettingsTab />
+                </TabsContent>
             </div>
         </Tabs>
     );
