@@ -10,9 +10,9 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.fadhlika</groupId>
-	<artifactId>lokasi</artifactId>
+	<artifactId>kelana</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>lokasi</name>
+	<name>kelana</name>
 	<description>Self-hosted location tracker </description>
 	<url />
 	<licenses>
@@ -116,8 +116,8 @@
 							</execution>
 						</executions>
 						<configuration>
-							<imageName>lokasi</imageName>
-							<mainClass>com.fadhlika.lokasi.LokasiApplication</mainClass>
+							<imageName>kelana</imageName>
+							<mainClass>com.fadhlika.kelana.KelanaApplication</mainClass>
 							<buildArgs>
 								<buildArg>-march=compatibility</buildArg>
 								<buildArg>--gc=G1</buildArg>

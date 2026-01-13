@@ -15,9 +15,9 @@ describe('login page', async () => {
     });
 
     it('should render login page', async () => {
-        const header = loginPage.getByText('Lokasi');
+        const header = loginPage.getByText('Kelana');
 
-        await expect.element(header).toHaveTextContent('Lokasi');
+        await expect.element(header).toHaveTextContent('Kelana');
     });
 
     describe('login', async () => {

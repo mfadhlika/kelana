@@ -1,0 +1,24 @@
+package com.fadhlika.kelana.model;
+
+import java.io.InputStream;
+import java.time.ZonedDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public record Import(
+                int id,
+                @JsonIgnore int userId,
+                String source,
+                String filename,
+                @JsonIgnore InputStream content,
+                String checksum,
+                boolean done, int count,
+                ZonedDateTime createdAt) {
+        public Import(int userId,
+                        String source,
+                        String filename,
+                        InputStream content,
+                        String checksum) {
+                this(0, userId, source, filename, content, checksum, false, -1, ZonedDateTime.now());
+        }
+}

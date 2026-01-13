@@ -1,0 +1,95 @@
+package com.fadhlika.kelana.config;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
+
+import com.fadhlika.kelana.service.IntegrationService;
+import com.fadhlika.kelana.service.JwtAuthService;
+import com.fadhlika.kelana.service.UserService;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+        private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
+        private final JwtAuthFilter jwtAuthFilter;
+
+        private final OwntracksAuthFilter owntracksAuthFilter;
+
+        private final OverlandAuthFilter overlandAuthFilter;
+
+        private final SecurityFilterException securityFilterException;
+
+        @Autowired
+        public SecurityConfig(JwtAuthService jwtAuthService, UserService userService,
+                        IntegrationService integrationService, SecurityFilterException securityFilterException) {
+                this.jwtAuthFilter = new JwtAuthFilter(jwtAuthService, userService);
+                this.owntracksAuthFilter = new OwntracksAuthFilter(userService, integrationService);
+                this.overlandAuthFilter = new OverlandAuthFilter(userService, integrationService);
+                this.securityFilterException = securityFilterException;
+        }
+
+        @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+                return config.getAuthenticationManager();
+        }
+
+        @Bean
+        public SecurityFilterChain owntracksSecurityFilterChain(HttpSecurity http) throws Exception {
+                http
+                                .securityMatcher("/api/owntracks")
+                                .csrf(AbstractHttpConfigurer::disable)
+                                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .addFilterBefore(owntracksAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                return http.build();
+        }
+
+        @Bean
+        public SecurityFilterChain overlandSecurityFilterChain(HttpSecurity http) throws Exception {
+                http
+                                .securityMatcher("/api/overland")
+                                .csrf(AbstractHttpConfigurer::disable)
+                                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .addFilterBefore(overlandAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                return http.build();
+        }
+
+        @Bean
+        public SecurityFilterChain jwtSecurityFilterChain(HttpSecurity http) throws Exception {
+                http
+                                .securityMatcher("/api/v1/**")
+                                .csrf(AbstractHttpConfigurer::disable)
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/login").permitAll()
+                                                .requestMatchers("/api/v1/auth/refresh").permitAll()
+                                                .requestMatchers("/api/v1/logout").permitAll()
+                                                .requestMatchers("/api/ws").permitAll()
+                                                .requestMatchers(
+                                                                new RegexRequestMatcher(
+                                                                                "/api/v1/trips/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                                                                                "GET"))
+                                                .permitAll()
+                                                .requestMatchers("/api/v1/**").authenticated())
+                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                                .addFilterBefore(securityFilterException, JwtAuthFilter.class);
+                return http.build();
+        }
+}

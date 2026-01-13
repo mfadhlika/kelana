@@ -1,6 +1,6 @@
-[![build](https://github.com/mfadhlika/lokasi/actions/workflows/build.yml/badge.svg)](https://github.com/mfadhlika/lokasi/actions/workflows/build.yml)
+[![build](https://github.com/mfadhlika/kelana/actions/workflows/build.yml/badge.svg)](https://github.com/mfadhlika/kelana/actions/workflows/build.yml)
 
-# <img src="webui/public/lokasi.svg" width=32 height=32> Lokasi
+# <img src="webui/public/kelana.svg" width=32 height=32> Kelana
 
 Self-hosted location tracking history
 
@@ -14,7 +14,7 @@ Self-hosted location tracking history
 - Reverse geocode tracked locations
 - Support Owntracks features
   - Tours (iOS)
-    - Tours are Trip in Lokasi, when create tour from Owntracks app it will create trip in Lokasi
+    - Tours are Trip in Kelana, when create tour from Owntracks app it will create trip in Kelana
     - Need to enable remote command, you can do this by export settings, edit `cmd` to `true` in `config.otrc`, then open the config in Owntracks.
   - MQTT
     - Only use for location message for now

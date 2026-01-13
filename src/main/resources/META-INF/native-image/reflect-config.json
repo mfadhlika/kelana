@@ -1,102 +1,102 @@
 [
     {
-        "name": "com.fadhlika.lokasi.dto.overland.Properties",
+        "name": "com.fadhlika.kelana.dto.overland.Properties",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.PointProperties",
+        "name": "com.fadhlika.kelana.dto.PointProperties",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.LineStringProperties",
+        "name": "com.fadhlika.kelana.dto.LineStringProperties",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.TripProperties",
+        "name": "com.fadhlika.kelana.dto.TripProperties",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.owntracks.Status",
+        "name": "com.fadhlika.kelana.dto.owntracks.Status",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.owntracks.Lwt",
+        "name": "com.fadhlika.kelana.dto.owntracks.Lwt",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.owntracks.Location",
+        "name": "com.fadhlika.kelana.dto.owntracks.Location",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.owntracks.StatusIos",
+        "name": "com.fadhlika.kelana.dto.owntracks.StatusIos",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.owntracks.StatusAndroid",
+        "name": "com.fadhlika.kelana.dto.owntracks.StatusAndroid",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.owntracks.Cmd",
+        "name": "com.fadhlika.kelana.dto.owntracks.Cmd",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.owntracks.Card",
+        "name": "com.fadhlika.kelana.dto.owntracks.Card",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.owntracks.Transition",
+        "name": "com.fadhlika.kelana.dto.owntracks.Transition",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.owntracks.Waypoint",
+        "name": "com.fadhlika.kelana.dto.owntracks.Waypoint",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.owntracks.Waypoints",
+        "name": "com.fadhlika.kelana.dto.owntracks.Waypoints",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.owntracks.Request",
+        "name": "com.fadhlika.kelana.dto.owntracks.Request",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.owntracks.Tour",
+        "name": "com.fadhlika.kelana.dto.owntracks.Tour",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
     },
     {
-        "name": "com.fadhlika.lokasi.dto.GeocodeProperties",
+        "name": "com.fadhlika.kelana.dto.GeocodeProperties",
         "allDeclaredConstructors": true,
         "allDeclaredFields": true,
         "allDeclaredMethods": true
