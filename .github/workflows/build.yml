@@ -176,7 +176,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build
-        run: mvn native:compile -Pnative -Dmaven.test.skip
+        run: mvn clean package -Dmaven.test.skip
 
       - name: Build Docker image
         id: build-image
