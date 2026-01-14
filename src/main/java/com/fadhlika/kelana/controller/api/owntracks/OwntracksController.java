@@ -37,7 +37,7 @@ public class OwntracksController {
         private String baseUrl;
 
         @Autowired
-        private OwntracksService owntracksMqttService;
+        private OwntracksService owntracksService;
 
         @PostMapping
         public ResponseEntity<?> pub(@RequestHeader("X-Limit-D") String deviceId,
@@ -45,7 +45,7 @@ public class OwntracksController {
                         throws JsonProcessingException {
                 User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-                Optional<?> res = this.owntracksMqttService.handleMessage(user, deviceId, message);
+                Optional<?> res = this.owntracksService.handleMessage(user, deviceId, message);
 
                 return ResponseEntity.ok().body(res);
         }

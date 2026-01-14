@@ -3,6 +3,7 @@ package com.fadhlika.kelana.repository;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class ImportRepository {
             rs.getString("checksum"),
             rs.getBoolean("done"),
             rs.getInt("count"),
-            ZonedDateTime.parse(rs.getString("created_at")));
+            rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
 
     public void saveImport(Import anImport) throws IOException {
         jdbcClient.sql(
@@ -44,7 +45,7 @@ public class ImportRepository {
                 .param(new String(anImport.content().readAllBytes(), StandardCharsets.UTF_8))
                 .param(anImport.checksum())
                 .param(anImport.count())
-                .param(anImport.createdAt())
+                .param(anImport.createdAt().toOffsetDateTime())
                 .update();
     }
 

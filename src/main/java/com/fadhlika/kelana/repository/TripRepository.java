@@ -1,6 +1,7 @@
 package com.fadhlika.kelana.repository;
 
 import java.sql.ResultSet;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +28,9 @@ public class TripRepository {
                 rs.getInt("id"),
                 rs.getInt("user_id"),
                 rs.getString("title"),
-                ZonedDateTime.parse(rs.getString("start_at")),
-                ZonedDateTime.parse(rs.getString("end_at")),
-                ZonedDateTime.parse(rs.getString("created_at")),
+                rs.getObject("start_at", OffsetDateTime.class).toZonedDateTime(),
+                rs.getObject("end_at", OffsetDateTime.class).toZonedDateTime(),
+                rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime(),
                 null,
                 uuid,
                 rs.getBoolean("is_public"));
@@ -38,13 +39,21 @@ public class TripRepository {
     public void saveTrip(Trip trip) {
         jdbcClient
                 .sql("""
-                        INSERT OR REPLACE INTO trip(user_id, title, start_at, end_at, created_at, uuid, is_public)
-                        VALUES(?, ?, ?, ?, ?, ?, ?)""")
+                        INSERT INTO trip(user_id, title, start_at, end_at, created_at, uuid, is_public)
+                        VALUES(?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT(uuid) DO UPDATE SET
+                            user_id = excluded.user_id,
+                            title = excluded.title,
+                            start_at = excluded.start_at,
+                            end_at = excluded.end_at,
+                            created_at = excluded.created_at,
+                            is_public = excluded.is_public
+                        """)
                 .param(trip.userId())
                 .param(trip.title())
-                .param(trip.startAt())
-                .param(trip.endAt())
-                .param(trip.createdAt())
+                .param(trip.startAt().toOffsetDateTime())
+                .param(trip.endAt().toOffsetDateTime())
+                .param(trip.createdAt().toOffsetDateTime())
                 .param(trip.uuid())
                 .param(trip.isPublic())
                 .update();

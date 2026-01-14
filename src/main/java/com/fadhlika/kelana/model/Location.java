@@ -75,7 +75,7 @@ public class Location {
     private BatteryState batteryState;
     private double battery;
     private String ssid;
-    private int importId;
+    private Integer importId;
     private String rawData;
     private ZonedDateTime createdAt;
     private FeatureCollection geocode;
@@ -255,7 +255,7 @@ public class Location {
         this.createdAt = createdAt;
     }
 
-    public int getImportId() {
+    public Integer getImportId() {
         return importId;
     }
 

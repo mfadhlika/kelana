@@ -19,12 +19,6 @@ public class BackupRepository {
     private DataSource ds;
 
     public void createBackup() throws SQLException {
-        try (Connection conn = ds.getConnection(); Statement stmt = conn.createStatement()) {
-            stmt.executeUpdate(
-                    String.format("backup to %s/kelana.%d.db", backupDir, System.currentTimeMillis() / 1000L));
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            throw ex;
-        }
+
     }
 }

@@ -19,8 +19,10 @@ public class RegionService {
     public void createRegion(Region region) {
         try {
             regionRepository.createRegion(region);
-        } catch (DataAccessException | JsonProcessingException e) {
+        } catch (DataAccessException e) {
             throw new InternalErrorException(e.getMessage());
+        } catch (JsonProcessingException e) {
+            throw new InternalErrorException(String.format("failed to serialize geocoding: %s", e.getMessage()));
         }
     }
 

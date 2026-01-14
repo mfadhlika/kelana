@@ -5,6 +5,8 @@
 package com.fadhlika.kelana.repository;
 
 import java.sql.ResultSet;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -38,18 +40,18 @@ public class UserRepository {
             rs.getInt("id"),
             rs.getString("username"),
             rs.getString("password"),
-            rs.getTimestamp("created_at"));
+            rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
 
     public void createUser(User user) {
-        jdbcClient.sql("INSERT INTO user(username, password, created_at) VALUES(?, ?, ?)")
+        jdbcClient.sql("INSERT INTO \"user\"(username, password, created_at) VALUES(?, ?, ?)")
                 .param(user.getUsername())
                 .param(user.getPassword())
-                .param(user.getCreatedAt())
+                .param(user.getCreatedAt().toOffsetDateTime())
                 .update();
     }
 
     public void updateUser(User user) {
-        jdbcClient.sql("UPDATE user SET username = ?, password = ? WHERE id = ?")
+        jdbcClient.sql("UPDATE \"user\" SET username = ?, password = ? WHERE id = ?")
                 .param(user.getUsername())
                 .param(user.getPassword())
                 .param(user.getId())
@@ -57,25 +59,25 @@ public class UserRepository {
     }
 
     public User getUser(String username) {
-        return jdbcClient.sql("SELECT id, username, password, created_at FROM `user` WHERE username = ?")
+        return jdbcClient.sql("SELECT id, username, password, created_at FROM \"user\" WHERE username = ?")
                 .param(username)
                 .query(userRowMapper)
                 .single();
     }
 
     public User getUser(int userId) {
-        return jdbcClient.sql("SELECT id, username, password, created_at FROM `user` WHERE id = ?")
+        return jdbcClient.sql("SELECT id, username, password, created_at FROM \"user\" WHERE id = ?")
                 .param(userId)
                 .query(userRowMapper)
                 .single();
     }
 
     public boolean hasUsers() {
-        return jdbcClient.sql("SELECT COUNT(*) FROM `user`").query(Integer.class).single() > 0;
+        return jdbcClient.sql("SELECT COUNT(*) FROM \"user\"").query(Integer.class).single() > 0;
     }
 
     public List<String> getUserDevices(int userId) {
-        return jdbcClient.sql("SELECT DISTINCT device_id FROM `location` WHERE user_id = ?")
+        return jdbcClient.sql("SELECT DISTINCT device_id FROM location WHERE user_id = ?")
                 .param(userId)
                 .query(String.class)
                 .list();

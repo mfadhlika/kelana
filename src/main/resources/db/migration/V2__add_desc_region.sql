@@ -1,1 +1,0 @@
-ALTER TABLE region ADD COLUMN desc TEXT;

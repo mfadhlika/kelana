@@ -1,6 +1,7 @@
 package com.fadhlika.kelana.repository;
 
 import java.sql.ResultSet;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class StatsRepository {
             rs.getInt("total_reverse_geocoded_points"),
             rs.getInt("total_cities_visited"),
             rs.getInt("total_countries_visited"),
-            ZonedDateTime.parse(rs.getString("last_point_timestamp")));
+            rs.getObject("last_point_timestamp", OffsetDateTime.class).toZonedDateTime());
 
     public Stats getStats(int userId) {
         return jdbClient.sql("""

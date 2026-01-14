@@ -1,6 +1,7 @@
 package com.fadhlika.kelana.repository;
 
 import java.sql.ResultSet;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -18,37 +19,38 @@ public class MqttRepository {
     private JdbcClient jdbcClient;
 
     public void createMessage(UUID uuid, String topic, String payload) {
-        jdbcClient.sql("INSERT INTO owntracks_mqtt_message(uuid, topic, payload, created_at) VALUES (?, ?, ?, ?)")
+        jdbcClient
+                .sql("INSERT INTO owntracks_mqtt_message(uuid, topic, payload, created_at) VALUES (?::uuid, ?, ?::jsonb, ?)")
                 .param(uuid)
                 .param(topic)
                 .param(payload)
-                .param(ZonedDateTime.now(ZoneOffset.UTC))
+                .param(ZonedDateTime.now(ZoneOffset.UTC).toOffsetDateTime())
                 .update();
     }
 
     public void updateMessageStatus(UUID uuid, MqttMessage.Status status) {
-        jdbcClient.sql("UPDATE owntracks_mqtt_message SET status = ? WHERE uuid = ?")
-                .param(status)
+        jdbcClient.sql("UPDATE owntracks_mqtt_message SET status = ? WHERE uuid = ?::uuid")
+                .param(status.toString())
                 .param(uuid)
                 .update();
     }
 
     public void updateMessageStatus(UUID uuid, MqttMessage.Status status, String reason) {
-        jdbcClient.sql("UPDATE owntracks_mqtt_message SET status = ?, reason = ? WHERE uuid = ?")
-                .param(status)
+        jdbcClient.sql("UPDATE owntracks_mqtt_message SET status = ?, reason = ? WHERE uuid = ?::uuid")
+                .param(status.toString())
                 .param(reason)
                 .param(uuid)
                 .update();
     }
 
     public List<MqttMessage> fetchMessages(Integer limit, Integer offset) {
-        return jdbcClient.sql("SELECT * FROM owntracks_mqtt_message LIMIT ? OFFSET ?")
+        return jdbcClient.sql("SELECT * FROM owntracks_mqtt_message ORDER BY created_at DESC LIMIT ? OFFSET ?")
                 .param(limit)
                 .param(offset)
                 .query((ResultSet rs, int rowNum) -> {
                     return new MqttMessage(rs.getInt("id"), rs.getString("uuid"), rs.getString("topic"),
                             rs.getString("payload"), MqttMessage.Status.valueOf(rs.getString("status")),
-                            rs.getString("reason"), ZonedDateTime.parse(rs.getString("created_at")));
+                            rs.getString("reason"), rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
                 })
                 .list();
     }

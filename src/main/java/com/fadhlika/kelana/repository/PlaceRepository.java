@@ -1,6 +1,7 @@
 package com.fadhlika.kelana.repository;
 
 import java.sql.ResultSet;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,7 @@ public class PlaceRepository {
                 rs.getString("street"),
                 rs.getString("state"),
                 rs.getBytes("geodata"),
-                ZonedDateTime.parse(rs.getString("created_at")));
+                rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
     };
 
     public void createPlace(Place place) {
@@ -68,7 +69,7 @@ public class PlaceRepository {
                     state,
                     geodata,
                     created_at
-                ) VALUES (?, GeomFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, jsonb(?), ?)""")
+                ) VALUES (?, GeomFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?)""")
                 .param(place.provider())
                 .param(place.geometry())
                 .param(place.type())
@@ -82,7 +83,7 @@ public class PlaceRepository {
                 .param(place.street())
                 .param(place.state())
                 .param(place.geodata())
-                .param(place.createdAt())
+                .param(place.createdAt().toOffsetDateTime())
                 .update();
     }
 

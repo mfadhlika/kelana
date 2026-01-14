@@ -3,6 +3,7 @@ package com.fadhlika.kelana.repository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.ResultSet;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -49,30 +50,29 @@ public class RegionRepository {
         return new Region(rs.getInt("id"), rs.getInt("user_id"), rs.getString("desc"), geometry,
                 rs.getString("beacon_uuid"), rs.getInt("beacon_major"),
                 rs.getInt("beacon_minor"), rs.getString("rid"), geocode,
-                ZonedDateTime.parse(rs.getString("created_at")));
+                rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
     };
 
     public void createRegion(Region region) throws JsonProcessingException {
         jdbcClient
                 .sql("""
-                            INSERT INTO region(user_id, desc, geometry, beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at)
-                            VALUES (?, ?, ST_GeomFromText(?), ?, ?, ?, ?, jsonb(?), ?)
-                        """)
+                        INSERT INTO region(user_id, "desc", geometry, beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at)
+                        VALUES (?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?::jsonb, ?)""")
                 .param(region.getUserId())
                 .param(region.getDesc())
-                .param(region.getGeometry())
+                .param(region.getGeometry().toText())
                 .param(region.getBeaconUUID())
                 .param(region.getBeaconMajor())
                 .param(region.getBeaconMinor())
                 .param(region.getRid())
                 .param(mapper.writeValueAsString(region.getGeocode()))
-                .param(region.getCreatedAt())
+                .param(region.getCreatedAt().toOffsetDateTime())
                 .update();
     }
 
     public List<Region> fetchRegions(int userId) {
         return jdbcClient.sql(
-                "SELECT id, user_id, desc, ST_AsBinary(geometry) AS geometry,  beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at FROM region WHERE user_id = ?")
+                "SELECT id, user_id, \"desc\", ST_AsBinary(geometry) AS geometry,  beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at FROM region WHERE user_id = ?")
                 .param(userId).query(rowMapper).list();
     }
 }

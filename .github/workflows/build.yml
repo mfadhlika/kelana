@@ -47,6 +47,21 @@ jobs:
         volumes:
           - /tmp/docker/mosquitto/config:/mosquitto/config
         options: --name mosquitto
+      postgres:
+        # Docker Hub image
+        image: postgis/postgis:18-3.6-alpine
+        ports:
+          - 5432:5432
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: kelana
+          POSTGRES_PASSWORD: kelana
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout repository
@@ -64,16 +79,14 @@ jobs:
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Spatialite
-        run: |
-          sudo apt update && \
-          sudo apt install -y libspatialite-dev libsqlite3-mod-spatialite spatialite-bin
-
       - name: Running tests
         run: mvn test
         env:
           MQTT_ENABLE: true
           MQTT_SERVER: tcp://127.0.0.1:1883
+          DB_HOST: 127.0.0.1
+          DB_USER: kelana
+          DB_PASSWORD: kelana
           ADMIN_USERNAME: test
           ADMIN_PASSWORD: test
           JWT_SECRET: jwt-secret-for-test
@@ -161,11 +174,6 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-      - name: Install Spatialite
-        run: |
-          sudo apt update && \
-          sudo apt install -y libspatialite-dev libsqlite3-mod-spatialite spatialite-bin
 
       - name: Build
         run: mvn native:compile -Pnative -Dmaven.test.skip

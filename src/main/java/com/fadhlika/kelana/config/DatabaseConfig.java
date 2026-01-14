@@ -1,7 +1,5 @@
 package com.fadhlika.kelana.config;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
@@ -13,44 +11,39 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.sqlite.SQLiteDataSource;
 
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 public class DatabaseConfig {
-    @Value("${kelana.db_path}")
-    private String dbPath;
+    @Value("${kelana.db_name}")
+    private String dbName;
+
+    @Value("${kelana.db_host}")
+    private String dbHost;
+
+    @Value("${kelana.db_port}")
+    private String dbPort;
+
+    @Value("${kelana.db_user}")
+    private String dbUser;
+
+    @Value("${kelana.db_password}")
+    private String dbPassword;
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseConfig.class);
 
     @Bean
     @Primary
     public DataSource mainDataSource() throws SQLException {
-        SQLiteDataSource sqliteDataSource = new SQLiteDataSource();
-        sqliteDataSource.setUrl(String.format("jdbc:sqlite:%s", dbPath));
-        sqliteDataSource.setLoadExtension(true);
-        sqliteDataSource.setJournalMode("WAL");
+        HikariConfig config = new HikariConfig();
+        config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
+        config.setJdbcUrl(String.format("jdbc:postgresql://%s:%s/%s?tcpKeepAlive=true", dbHost, dbPort, dbName));
+        config.setUsername(dbUser);
+        config.setPassword(dbPassword);
 
-        HikariDataSource ds = new HikariDataSource();
-        ds.setDataSource(sqliteDataSource);
-        ds.setConnectionInitSql("""
-                SELECT load_extension('mod_spatialite');
-                PRAGMA trusted_schema=1;
-                    """);
-        ds.setMinimumIdle(2);
-        ds.setMaximumPoolSize(10);
-        ds.setIdleTimeout(120000);
-        ds.setLeakDetectionThreshold(300000);
-
-        try (Connection conn = ds.getConnection();
-                final PreparedStatement stmt = conn
-                        .prepareStatement("SELECT InitSpatialMetadata(1)")) {
-            stmt.executeQuery();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            throw ex;
-        }
+        HikariDataSource ds = new HikariDataSource(config);
 
         Flyway flyway = Flyway.configure()
                 .dataSource(ds)

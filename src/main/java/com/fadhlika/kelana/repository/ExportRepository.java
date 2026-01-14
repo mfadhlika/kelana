@@ -2,7 +2,9 @@ package com.fadhlika.kelana.repository;
 
 import java.io.IOException;
 import java.sql.ResultSet;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,26 +24,26 @@ public class ExportRepository {
                 rs.getInt("id"),
                 rs.getInt("user_id"),
                 rs.getString("filename"),
-                ZonedDateTime.parse(rs.getString("start_at")),
-                ZonedDateTime.parse(rs.getString("end_at")),
+                rs.getObject("start_end", OffsetDateTime.class).toZonedDateTime(),
+                rs.getObject("end_at", OffsetDateTime.class).toZonedDateTime(),
                 rs.getAsciiStream("content"),
                 rs.getBoolean("done"),
-                ZonedDateTime.parse(rs.getString("created_at")));
+                rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
     };
 
     public void save(Export export) throws IOException {
         jdbcClient.sql("""
                     INSERT INTO export(user_id, filename, start_at, end_at, content, done, created_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
-                    ON CONFLICT DO UPDATE SET content = excluded.content, done = excluded.done
+                    ON CONFLICT (user_id, filename) DO UPDATE SET content = excluded.content, done = excluded.done
                 """)
                 .param(export.userId())
                 .param(export.filename())
-                .param(export.startAt())
-                .param(export.endAt())
+                .param(export.startAt().toOffsetDateTime())
+                .param(export.endAt().toOffsetDateTime())
                 .param(export.content().readAllBytes())
                 .param(export.done())
-                .param(export.createdAt())
+                .param(export.createdAt().toOffsetDateTime())
                 .update();
     }
 

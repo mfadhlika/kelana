@@ -61,7 +61,12 @@ public class OwntracksMqttController {
             @Header(MqttHeaders.ID) String id) {
         logger.info("handle message {} from {}", id, topic);
 
-        UUID messageSerial = mqttService.saveMessage(payload, topic);
+        UUID messageSerial;
+        try {
+            messageSerial = mqttService.saveMessage(payload, topic);
+        } catch (Exception e) {
+            throw e;
+        }
 
         try {
             String username;

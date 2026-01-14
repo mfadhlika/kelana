@@ -6,6 +6,7 @@ package com.fadhlika.kelana.model;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -45,12 +46,12 @@ public class User implements UserDetails {
     private int id;
     private String username;
     private String password;
-    private Timestamp createdAt;
+    private ZonedDateTime createdAt;
 
     public User(String username, String password) {
         this.username = username;
         this.password = password;
-        this.createdAt = Timestamp.valueOf(LocalDateTime.now());
+        this.createdAt = ZonedDateTime.now();
     }
 
     public User(int id, String username, String password) {
@@ -59,7 +60,7 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public User(int id, String username, String password, Timestamp createdAt) {
+    public User(int id, String username, String password, ZonedDateTime createdAt) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -89,7 +90,7 @@ public class User implements UserDetails {
         this.username = username;
     }
 
-    public Timestamp getCreatedAt() {
+    public ZonedDateTime getCreatedAt() {
         return createdAt;
     }
 
