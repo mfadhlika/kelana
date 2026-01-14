@@ -1,7 +1,13 @@
-FROM debian:bookworm-slim
+FROM eclipse-temurin:21-jre-alpine-3.23
+
+RUN addgroup -S spring && adduser -S spring -G spring
+
+USER spring:spring
+
+ARG JAR_FILE=target/*.jar
 
 WORKDIR /app
 
-COPY target/kelana kelana
+COPY ${JAR_FILE} kelana.jar
 
-ENTRYPOINT ["/app/kelana"]
+ENTRYPOINT ["java","-jar","/app/kelana.jar"]
