@@ -73,11 +73,10 @@ jobs:
           echo -e 'listener 1883\nallow_anonymous true\nlog_type error warning notice information\n' | sudo tee /tmp/docker/mosquitto/config/mosquitto.conf
           docker restart mosquitto
 
-      - uses: graalvm/setup-graalvm@v1
+      - uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'graalvm'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          distribution: 'temurin'
 
       - name: Running tests
         run: mvn test
@@ -148,11 +147,10 @@ jobs:
           name: webui-production-files
           path: ./webui/dist
 
-      - uses: graalvm/setup-graalvm@v1
+      - uses: actions/setup-java@v5
         with:
+          distribution: 'temurin'
           java-version: '21'
-          distribution: 'graalvm'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare
         run: |
@@ -176,7 +174,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build
-        run: mvn native:compile -Pnative -Dmaven.test.skip
+        run: mvn clean package -Dmaven.test.skip
 
       - name: Build Docker image
         id: build-image

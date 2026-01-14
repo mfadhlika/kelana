@@ -38,8 +38,8 @@ public class DatabaseConfig {
     @Primary
     public DataSource mainDataSource() throws SQLException {
         HikariConfig config = new HikariConfig();
-        config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
-        config.setJdbcUrl(String.format("jdbc:postgresql://%s:%s/%s?tcpKeepAlive=true", dbHost, dbPort, dbName));
+        String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s?tcpKeepAlive=true", dbHost, dbPort, dbName);
+        config.setJdbcUrl(jdbcUrl);
         config.setUsername(dbUser);
         config.setPassword(dbPassword);
 
