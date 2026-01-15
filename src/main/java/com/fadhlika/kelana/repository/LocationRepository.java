@@ -66,7 +66,7 @@ public class LocationRepository {
             location.setSpeed(rs.getDouble("speed"));
             location.setAccuracy(rs.getInt("accuracy"));
             location.setVerticalAccuracy(rs.getInt("vertical_accuracy"));
-            location.setBatteryState(rs.getString("battery_state"));
+            location.setBatteryState(rs.getInt("battery_state"));
             location.setBattery(rs.getDouble("battery"));
             location.setSsid(rs.getString("ssid"));
             location.setTimestamp(rs.getObject("timestamp", OffsetDateTime.class).toZonedDateTime());
@@ -151,7 +151,7 @@ public class LocationRepository {
                 .param(location.getAccuracy())
                 .param(location.getVerticalAccuracy())
                 .param(location.getMotions())
-                .param(location.getBatteryState())
+                .param(location.getBatteryState().value)
                 .param(location.getBattery())
                 .param(location.getSsid())
                 .param(location.getTimestamp().toOffsetDateTime())

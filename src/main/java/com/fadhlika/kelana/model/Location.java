@@ -72,7 +72,7 @@ public class Location {
     private int accuracy;
     private int verticalAccuracy;
     private List<String> motions;
-    private BatteryState batteryState;
+    private BatteryState batteryState = BatteryState.UNKNOWN;
     private double battery;
     private String ssid;
     private Integer importId;
