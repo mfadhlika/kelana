@@ -1,40 +1,31 @@
 package com.fadhlika.kelana.controller.mqtt.owntracks;
 
-import com.fadhlika.kelana.dto.owntracks.Cmd;
-import com.fadhlika.kelana.dto.owntracks.Message;
-import com.fadhlika.kelana.exception.UnhandledMqttMessage;
 import com.fadhlika.kelana.gateways.MqttGateway;
 import com.fadhlika.kelana.model.MqttMessage;
-import com.fadhlika.kelana.model.Trip;
 import com.fadhlika.kelana.model.User;
-import com.fadhlika.kelana.service.LocationService;
 import com.fadhlika.kelana.service.MqttService;
 import com.fadhlika.kelana.service.OwntracksService;
-import com.fadhlika.kelana.service.TripService;
 import com.fadhlika.kelana.service.UserService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.paho.client.mqttv3.MqttException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 @Component
+@ConditionalOnProperty(value = "mqtt.enable", havingValue = "true")
 public class OwntracksMqttController {
     private final Logger logger = LoggerFactory.getLogger(OwntracksMqttController.class);
 
