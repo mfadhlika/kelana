@@ -18,7 +18,6 @@ Self-hosted location tracking history
     - Need to enable remote command, you can do this by export settings, edit `cmd` to `true` in `config.otrc`, then open the config in Owntracks.
   - MQTT
     - Only use for location message for now
-- Single container deployment, no need to deploy database(s) or any other service
 
 ### Planned
 
