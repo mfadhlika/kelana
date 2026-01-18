@@ -43,7 +43,11 @@ public class OwntracksControllerIntegrationTest {
     com.fadhlika.kelana.dto.owntracks.Location location = new com.fadhlika.kelana.dto.owntracks.Location(10, 50, 95,
         null, 270, -1.23456,
         12.34567, null, null,
-        null, 1672531200, null, 15, null, null, null, null, null, null, null, null, null, null, null, null,
+        null, 1672531200, null, 15, null, null, null, null, null, null, null, null, null, new ArrayList<>() {
+          {
+            add("driving");
+          }
+        }, null, null,
         0,
         null, null);
 
