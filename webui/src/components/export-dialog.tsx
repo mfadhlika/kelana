@@ -31,9 +31,7 @@ export const ExportDialog = ({ className }: React.ComponentProps<"div">) => {
 
     const form = useForm<ExportRequest>({
         resolver: zodResolver(exportFormSchema),
-        defaultValues: {
-
-        }
+        defaultValues: {}
     });
 
     const { formState, watch } = form;
@@ -57,6 +55,7 @@ export const ExportDialog = ({ className }: React.ComponentProps<"div">) => {
     }, [startAt, endAt]);
 
     const onSubmit = (values: ExportRequest) => {
+
         exportService.createExport(values)
             .then((data) => {
                 toast.success(data.message)
@@ -91,7 +90,7 @@ export const ExportDialog = ({ className }: React.ComponentProps<"div">) => {
                                     <FormItem>
                                         <FormLabel>Start at</FormLabel>
                                         <FormControl>
-                                            <Input type="datetime-local" ref={field.ref} value={toISOLocal(field.value)} onChange={e => field.onChange(e.target.valueAsDate)} />
+                                            <Input type="datetime-local" ref={field.ref} value={toISOLocal(field.value)} onChange={e => field.onChange(new Date(e.target.value))} />
                                         </FormControl>
                                         {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
                                     </FormItem>
@@ -101,7 +100,7 @@ export const ExportDialog = ({ className }: React.ComponentProps<"div">) => {
                                     <FormItem>
                                         <FormLabel>End at</FormLabel>
                                         <FormControl>
-                                            <Input type="datetime-local" ref={field.ref} value={toISOLocal(field.value)} onChange={e => field.onChange(e.target.valueAsDate)} />
+                                            <Input type="datetime-local" ref={field.ref} value={toISOLocal(field.value)} onChange={e => field.onChange(new Date(e.target.value))} />
                                         </FormControl>
                                         {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
                                     </FormItem>
