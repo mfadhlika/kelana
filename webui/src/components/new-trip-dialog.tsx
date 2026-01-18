@@ -108,7 +108,7 @@ export const NewTripDialog = ({ className, onClose, trip, children }: NewTripDia
                                     <FormItem>
                                         <FormLabel>Start at</FormLabel>
                                         <FormControl>
-                                            <Input type="datetime-local" ref={field.ref} value={toISOLocal(field.value)} onChange={e => field.onChange(e.target.valueAsDate)} />
+                                            <Input type="datetime-local" ref={field.ref} value={toISOLocal(field.value)} onChange={e => field.onChange(new Date(e.target.value))} />
                                         </FormControl>
                                         {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
                                     </FormItem>
@@ -118,7 +118,7 @@ export const NewTripDialog = ({ className, onClose, trip, children }: NewTripDia
                                     <FormItem>
                                         <FormLabel>End at</FormLabel>
                                         <FormControl>
-                                            <Input type="datetime-local" ref={field.ref} value={toISOLocal(field.value)} onChange={e => field.onChange(e.target.valueAsDate)} />
+                                            <Input type="datetime-local" ref={field.ref} value={toISOLocal(field.value)} onChange={e => field.onChange(new Date(e.target.value))} />
                                         </FormControl>
                                         {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
                                     </FormItem>
