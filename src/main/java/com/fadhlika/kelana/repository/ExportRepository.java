@@ -3,8 +3,6 @@ package com.fadhlika.kelana.repository;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +22,7 @@ public class ExportRepository {
                 rs.getInt("id"),
                 rs.getInt("user_id"),
                 rs.getString("filename"),
-                rs.getObject("start_end", OffsetDateTime.class).toZonedDateTime(),
+                rs.getObject("start_at", OffsetDateTime.class).toZonedDateTime(),
                 rs.getObject("end_at", OffsetDateTime.class).toZonedDateTime(),
                 rs.getAsciiStream("content"),
                 rs.getBoolean("done"),
@@ -33,7 +31,7 @@ public class ExportRepository {
 
     public void save(Export export) throws IOException {
         jdbcClient.sql("""
-                    INSERT INTO export(user_id, filename, start_at, end_at, content, done, created_at)
+                    INSERT INTO "export"(user_id, filename, start_at, end_at, content, done, created_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT (user_id, filename) DO UPDATE SET content = excluded.content, done = excluded.done
                 """)
@@ -49,7 +47,7 @@ public class ExportRepository {
 
     public List<Export> fetch(int userId) {
         return jdbcClient.sql("""
-                SELECT * FROM export WHERE user_id = ?
+                SELECT * FROM "export" WHERE user_id = ?
                 """)
                 .param(userId)
                 .query(rowMapper)
@@ -58,7 +56,7 @@ public class ExportRepository {
 
     public Export get(int id) {
         return jdbcClient.sql("""
-                SELECT * FROM export WHERE id = ?
+                SELECT * FROM "export" WHERE id = ?
                 """)
                 .param(id)
                 .query(rowMapper)
@@ -67,7 +65,7 @@ public class ExportRepository {
 
     public Export get(int userId, String filename) {
         return jdbcClient.sql("""
-                SELECT * FROM export WHERE user_id = ? AND filename = ?
+                SELECT * FROM "export" WHERE user_id = ? AND filename = ?
                 """)
                 .param(userId)
                 .param(filename)
