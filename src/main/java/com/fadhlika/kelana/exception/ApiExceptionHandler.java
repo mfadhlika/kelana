@@ -26,7 +26,7 @@ public class ApiExceptionHandler {
             return new ResponseEntity<>(new Response<>(ex.getMessage()), status.value());
         }
 
-        ex.printStackTrace();
+        logger.error("InternalServerError: {}", ex.getMessage());
         return new ResponseEntity<>(new Response<>(ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
