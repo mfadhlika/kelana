@@ -3,8 +3,8 @@ import z from "zod";
 
 export const tripFormSchema = z.object({
     title: z.string(),
-    startAt: z.coerce.date<Date>(),
-    endAt: z.coerce.date<Date>(),
+    startAt: z.date(),
+    endAt: z.date(),
     uuid: z.optional(z.uuid()),
     isPublic: z.boolean()
 }).refine((data) => isAfter(data.endAt, data.startAt), {
