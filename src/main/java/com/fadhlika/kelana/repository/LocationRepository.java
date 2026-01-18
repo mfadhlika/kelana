@@ -20,6 +20,7 @@ import com.fadhlika.kelana.model.Location;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
+import org.locationtech.jts.io.WKTWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -271,7 +272,8 @@ public class LocationRepository {
 
         bounds.ifPresent((b) -> {
             where.add("ST_CoveredBy(geometry, ST_GeomFromText(?))");
-            args.add(b);
+            WKTWriter w = new WKTWriter();
+            args.add(w.write(b));
         });
 
         StringBuilder sqlBuilder = new StringBuilder("""
