@@ -1,6 +1,5 @@
 package com.fadhlika.kelana.util;
 
-import com.fadhlika.kelana.dto.Feature;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -8,7 +7,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.geojson.GeoJsonWriter;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 public class GeometrySerializer extends JsonSerializer<Geometry> {
 
