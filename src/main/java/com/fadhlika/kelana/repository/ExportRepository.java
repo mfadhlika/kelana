@@ -24,7 +24,7 @@ public class ExportRepository {
                 rs.getString("filename"),
                 rs.getObject("start_at", OffsetDateTime.class).toZonedDateTime(),
                 rs.getObject("end_at", OffsetDateTime.class).toZonedDateTime(),
-                rs.getAsciiStream("content"),
+                rs.getBinaryStream("content"),
                 rs.getBoolean("done"),
                 rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
     };
@@ -46,9 +46,8 @@ public class ExportRepository {
     }
 
     public List<Export> fetch(int userId) {
-        return jdbcClient.sql("""
-                SELECT * FROM "export" WHERE user_id = ?
-                """)
+        return jdbcClient.sql(
+                "SELECT id, user_id, filename, start_at, end_at, done, null AS content, created_at FROM \"export\" WHERE user_id = ?")
                 .param(userId)
                 .query(rowMapper)
                 .list();
