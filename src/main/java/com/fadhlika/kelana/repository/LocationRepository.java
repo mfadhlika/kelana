@@ -275,9 +275,9 @@ public class LocationRepository {
 
         geocoded.ifPresent((v) -> {
             if (v)
-                where.add("geocode != jsonb('null')");
+                where.add("geocode != 'null'");
             else
-                where.add("geocode = jsonb('null')");
+                where.add("geocode = 'null'");
         });
 
         bounds.ifPresent((b) -> {
