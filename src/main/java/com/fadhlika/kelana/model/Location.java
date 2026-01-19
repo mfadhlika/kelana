@@ -65,15 +65,15 @@ public class Location {
     @JsonDeserialize(using = GeometryDeserializer.class)
     private Geometry geometry;
     private ZonedDateTime timestamp;
-    private int altitude;
-    private int course;
-    private int courseAccuracy;
-    private double speed;
-    private int accuracy;
-    private int verticalAccuracy;
+    private Integer altitude;
+    private Integer course;
+    private Integer courseAccuracy;
+    private Double speed;
+    private Integer accuracy;
+    private Integer verticalAccuracy;
     private List<String> motions;
     private BatteryState batteryState = BatteryState.UNKNOWN;
-    private double battery;
+    private Double battery;
     private String ssid;
     private Integer importId;
     private String rawData;
@@ -123,7 +123,7 @@ public class Location {
         this.deviceId = deviceId;
     }
 
-    public int getAltitude() {
+    public Integer getAltitude() {
         return altitude;
     }
 
@@ -131,7 +131,7 @@ public class Location {
         this.altitude = altitude;
     }
 
-    public int getCourse() {
+    public Integer getCourse() {
         return course;
     }
 
@@ -139,7 +139,7 @@ public class Location {
         this.course = course;
     }
 
-    public double getSpeed() {
+    public Double getSpeed() {
         return speed;
     }
 
@@ -147,7 +147,7 @@ public class Location {
         this.speed = speed;
     }
 
-    public int getAccuracy() {
+    public Integer getAccuracy() {
         return accuracy;
     }
 
@@ -155,7 +155,7 @@ public class Location {
         this.accuracy = accuracy;
     }
 
-    public int getVerticalAccuracy() {
+    public Integer getVerticalAccuracy() {
         return verticalAccuracy;
     }
 
@@ -210,7 +210,7 @@ public class Location {
         };
     }
 
-    public double getBattery() {
+    public Double getBattery() {
         return battery;
     }
 
@@ -263,7 +263,7 @@ public class Location {
         this.importId = importId;
     }
 
-    public int getCourseAccuracy() {
+    public Integer getCourseAccuracy() {
         return courseAccuracy;
     }
 
