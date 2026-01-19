@@ -2,7 +2,6 @@ package com.fadhlika.kelana.repository;
 
 import java.sql.ResultSet;
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
