@@ -21,30 +21,31 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response<Void>> handleException(Exception ex) {
+        logger.error("Exception caught: {}", ex.getMessage(), ex);
+
         if (ex.getClass().isAnnotationPresent(ResponseStatus.class)) {
             ResponseStatus status = ex.getClass().getAnnotation(ResponseStatus.class);
             return new ResponseEntity<>(new Response<>(ex.getMessage()), status.value());
         }
 
-        logger.error("InternalServerError: {}", ex.getMessage());
         return new ResponseEntity<>(new Response<>(ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(MissingRequestCookieException.class)
     public ResponseEntity<Response<Void>> handleMissingRequestCookieException(MissingRequestCookieException ex) {
-        logger.error("MissingRequestCookieException: {}", ex.getMessage());
+        logger.error("MissingRequestCookieException: {}", ex.getMessage(), ex);
         return new ResponseEntity<>(new Response<>(ex.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(SignatureVerificationException.class)
     public ResponseEntity<Response<Void>> handleSignatureVerificationException(SignatureVerificationException ex) {
-        logger.error("SignatureVerificationException: {}", ex.getMessage());
+        logger.error("SignatureVerificationException: {}", ex.getMessage(), ex);
         return new ResponseEntity<>(new Response<>(ex.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(MissingResourceException.class)
     public ResponseEntity<Response<Void>> handleMissingResourceException(MissingResourceException ex) {
-        logger.error("MissingResourceException: {}", ex.getMessage());
+        logger.error("MissingResourceException: {}", ex.getMessage(), ex);
         return new ResponseEntity<>(new Response<>(ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 }
