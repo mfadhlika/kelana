@@ -2,6 +2,7 @@ package com.fadhlika.kelana.model;
 
 import java.time.ZonedDateTime;
 
+import org.locationtech.jts.algorithm.MinimumBoundingCircle;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.util.GeometricShapeFactory;
@@ -100,6 +101,11 @@ public class Region {
         this.createdAt = createdAt;
     }
 
+    public double getRadius() {
+        MinimumBoundingCircle circle = new MinimumBoundingCircle(this.getGeometry());
+        return circle.getRadius() * 111320d;
+    }
+
     public Region(
             int id,
             int userId,
@@ -135,14 +141,16 @@ public class Region {
             ZonedDateTime createdAt) {
 
         GeometricShapeFactory shape = new GeometricShapeFactory();
-        shape.setCentre(new Coordinate(lon, lat));
 
-        double widthInDegrees = rad / (40075000 * Math.cos(Math.toRadians(lat)) / 360);
-        double heightInDegrees = rad / 111320d;
+        double diameter = 2d * (double) rad;
+        double widthInDegrees = diameter / (40075000d * Math.cos(Math.toRadians(lat)) /
+                360d);
+        double heightInDegrees = diameter / 111320d;
         shape.setWidth(widthInDegrees);
         shape.setHeight(heightInDegrees);
+        shape.setNumPoints(35);
 
-        shape.setNumPoints(36);
+        shape.setCentre(new Coordinate(lon, lat));
 
         this.geometry = shape.createCircle();
 

@@ -69,13 +69,12 @@ public class OwntracksService {
         List<Waypoint> waypoints = this.regionService.fetchRegions(user.getId()).stream()
                 .map(region -> {
                     Coordinate coord = region.getGeometry().getCoordinate();
-                    MinimumBoundingCircle circle = new MinimumBoundingCircle(region.getGeometry());
 
                     return new Waypoint(
                             region.getDesc(),
                             coord.y,
                             coord.x,
-                            (int) circle.getRadius(),
+                            (int) region.getRadius(),
                             Math.toIntExact(region.getCreatedAt().toEpochSecond()),
                             region.getBeaconUUID(),
                             region.getBeaconMajor(),
