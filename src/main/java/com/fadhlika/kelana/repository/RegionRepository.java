@@ -56,7 +56,13 @@ public class RegionRepository {
         jdbcClient
                 .sql("""
                         INSERT INTO region(user_id, "desc", geometry, beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at)
-                        VALUES (?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?::jsonb, ?)""")
+                        VALUES (?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?::jsonb, ?)
+                        ON CONFLICT (rid) DO UPDATE SET
+                            "desc" = excluded."desc",
+                            geometry = excluded.geometry,
+                            beacon_uuid = excluded.beacon_uuid,
+                            beacon_major = excluded.beacon_major,
+                            beacon_minor = excluded.beacon_minor""")
                 .param(region.getUserId())
                 .param(region.getDesc())
                 .param(region.getGeometry().toText())
