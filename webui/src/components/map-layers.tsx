@@ -1,5 +1,5 @@
-import type { Feature, FeatureCollection, LineString, Point, Polygon } from "geojson";
-import { FeatureGroup, CircleMarker, Popup, Polyline, Tooltip, Marker, useMap, Polygon as PolygonL } from "react-leaflet";
+import type { Feature, FeatureCollection, LineString, Point } from "geojson";
+import { FeatureGroup, CircleMarker, Popup, Polyline, Tooltip, Marker, useMap, Polygon } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import type { LineStringProperties, PointProperties, RegionProperties } from "@/types/properties";
 import * as turf from "@turf/turf";
@@ -297,16 +297,11 @@ export function MapLayers({
                 <Tooltip>{formatDistanceToNow(new Date(lastKnowLocation.properties.timestamp))} ago</Tooltip>
             </Marker>}
         {showRegions && regions && <FeatureGroup>
-            {regions?.features.filter((_, i) => i > 0).map(feature => {
-                let positions;
-                if (feature.geometry.type == 'LineString') {
-                    const lines = turf.getCoords(turf.flip(feature));
-                    const polygon = turf.lineToPolygon(turf.lineString(lines));
-                    positions = turf.getCoords(polygon as Feature<Polygon>);
-                } else {
-                    positions = turf.getCoords(turf.flip(feature));
-                }
-                return <PolygonL positions={positions} />
+            {regions.features.map(feature => {
+                const positions = turf.getCoords(turf.flip(feature));
+                return <Polygon key={feature.properties?.desc} positions={positions}>
+                    <Tooltip>{feature.properties?.desc}</Tooltip>
+                </Polygon>
             })}
         </FeatureGroup>}
     </>);
