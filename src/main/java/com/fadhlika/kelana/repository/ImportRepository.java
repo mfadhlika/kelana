@@ -85,7 +85,8 @@ public class ImportRepository {
     }
 
     public List<Import> getImports(int userId) {
-        return jdbcClient.sql("SELECT * FROM import WHERE user_id = ?")
+        return jdbcClient.sql(
+                "SELECT id, user_id, source, filename, NULL AS content, checksum, count, done, created_at FROM import WHERE user_id = ?")
                 .param(userId)
                 .query(importRowMapper)
                 .list();
