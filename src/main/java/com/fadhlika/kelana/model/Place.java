@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 
 import org.locationtech.jts.geom.Geometry;
 
+import com.fadhlika.kelana.dto.FeatureCollection;
 import com.fadhlika.kelana.util.GeometryDeserializer;
 import com.fadhlika.kelana.util.GeometrySerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -24,7 +25,7 @@ public record Place(
         String locality,
         String street,
         String state,
-        byte[] geodata,
+        FeatureCollection geodata,
         ZonedDateTime createdAt) {
     public Place(
             String provider,
@@ -39,7 +40,7 @@ public record Place(
             String locality,
             String street,
             String state,
-            byte[] geodata) {
+            FeatureCollection geodata) {
         this(0, provider, geometry, type, postcode, countryCode, name, country, city, district, locality, street, state,
                 geodata, ZonedDateTime.now(ZoneOffset.UTC));
     }

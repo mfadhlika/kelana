@@ -18,6 +18,10 @@ public class PlaceService {
             Optional<String> country,
             Optional<Integer> limit,
             Optional<Integer> offset) {
-        return placeRepository.fetchPlaces(city, country, limit, offset);
+        try {
+            return placeRepository.fetchPlaces(city, country, limit, offset);
+        } catch (Exception e) {
+            throw e;
+        }
     }
 }
