@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
-@RequestMapping("/api/v1/export")
+@RequestMapping("/api/v1/exports")
 public class ExportController {
     @Autowired
     private ExportService exportService;
