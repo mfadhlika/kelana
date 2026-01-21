@@ -21,7 +21,6 @@ import com.fadhlika.kelana.model.Location;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
-import org.locationtech.jts.io.WKTWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -275,15 +274,14 @@ public class LocationRepository {
 
         geocoded.ifPresent((v) -> {
             if (v)
-                where.add("geocode != 'null'");
+                where.add("geocode IS NOT NULL OR geocode != 'null'");
             else
-                where.add("geocode = 'null'");
+                where.add("geocode IS NULL OR geocode = 'null'");
         });
 
         bounds.ifPresent((b) -> {
             where.add("ST_CoveredBy(geometry, ST_GeomFromText(:bounds))");
-            WKTWriter w = new WKTWriter();
-            args.put("bounds", w.write(b));
+            args.put("bounds", b.toText());
         });
 
         StringBuilder sqlBuilder = new StringBuilder("""
