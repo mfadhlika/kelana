@@ -2,6 +2,7 @@ package com.fadhlika.kelana.service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import org.locationtech.jts.geom.Coordinate;
@@ -98,7 +99,11 @@ public class ReverseGeocodeService {
                                 props.locality(),
                                 props.street(),
                                 props.state(),
-                                mapper.writeValueAsBytes(feature)));
+                                new FeatureCollection(new ArrayList<>() {
+                                    {
+                                        add(feature);
+                                    }
+                                })));
                     }
 
                     transactionManager.commit(status);

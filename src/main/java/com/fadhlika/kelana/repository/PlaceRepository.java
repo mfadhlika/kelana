@@ -1,5 +1,7 @@
 package com.fadhlika.kelana.repository;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.ResultSet;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -14,12 +16,18 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
+import com.fadhlika.kelana.dto.FeatureCollection;
 import com.fadhlika.kelana.model.Place;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Repository
 public class PlaceRepository {
     @Autowired
     public JdbcClient jdbcClient;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     private final WKBReader wkbReader = new WKBReader();
 
@@ -33,6 +41,17 @@ public class PlaceRepository {
                 throw new RuntimeException(e.getMessage());
             }
         }
+
+        FeatureCollection geodata = null;
+        InputStream geodataIS = rs.getAsciiStream("geodata");
+        if (geodataIS != null) {
+            try {
+                geodata = mapper.readValue(geodataIS, FeatureCollection.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         return new Place(
                 rs.getInt("id"),
                 rs.getString("provider"),
@@ -47,13 +66,13 @@ public class PlaceRepository {
                 rs.getString("locality"),
                 rs.getString("street"),
                 rs.getString("state"),
-                rs.getBytes("geodata"),
+                geodata,
                 rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
     };
 
-    public void createPlace(Place place) {
+    public void createPlace(Place place) throws JsonProcessingException {
         jdbcClient.sql("""
-                INSERT OR IGNORE INTO place(
+                INSERT INTO place(
                     provider,
                     geometry,
                     type,
@@ -68,9 +87,9 @@ public class PlaceRepository {
                     state,
                     geodata,
                     created_at
-                ) VALUES (?, GeomFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?)""")
+                ) VALUES (?, ST_GeomFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::json, ?)""")
                 .param(place.provider())
-                .param(place.geometry())
+                .param(place.geometry().toText())
                 .param(place.type())
                 .param(place.postcode())
                 .param(place.countryCode())
@@ -81,7 +100,7 @@ public class PlaceRepository {
                 .param(place.locality())
                 .param(place.street())
                 .param(place.state())
-                .param(place.geodata())
+                .param(mapper.writeValueAsString(place.geodata()))
                 .param(place.createdAt().toOffsetDateTime())
                 .update();
     }
@@ -104,8 +123,8 @@ public class PlaceRepository {
                     ST_AsBinary(geometry) AS geometry,
                     geodata,
                     created_at
-                FROM place WHERE AsText(geometry) =  ?""")
-                .param(geometry)
+                FROM place WHERE ST_AsText(geometry) =  ?""")
+                .param(geometry.toText())
                 .query(rowMapper)
                 .optional();
     }
