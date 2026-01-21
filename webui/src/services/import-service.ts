@@ -9,7 +9,7 @@ class ImportService {
         formData.set("source", im.source);
         formData.set("file", im.file.item(0)!);
 
-        return axiosInstance.post(`v1/import`, formData, {
+        return axiosInstance.post(`v1/imports`, formData, {
             headers: {
                 "Content-Type": "multipart/form-data"
             }
@@ -19,18 +19,18 @@ class ImportService {
 
     fetchImports = async (): Promise<Response<Import[]>> => {
         return axiosInstance
-            .get<Response<Import[]>>(`v1/import`)
+            .get<Response<Import[]>>(`v1/imports`)
             .then(res => res.data);
     }
 
     fetchImportRawContent = async (id: number): Promise<Blob> => {
-        return axiosInstance.get(`v1/import/${id}/raw`, {
+        return axiosInstance.get(`v1/imports/${id}/raw`, {
             responseType: 'blob'
         }).then(res => res.data);
     }
 
     deleteImport = async (id: number): Promise<Response> => {
-        return axiosInstance.delete(`v1/import/${id}`)
+        return axiosInstance.delete(`v1/imports/${id}`)
             .then(res => res.data);
     }
 }
