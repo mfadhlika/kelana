@@ -31,7 +31,7 @@ public class DatabaseConfig {
     @Value("${kelana.db_password}")
     private String dbPassword;
 
-    @Value("${spring.flyway.clean-disabled}")
+    @Value("${spring.flyway.clean-disabled:false}")
     private boolean cleanDisabled;
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseConfig.class);

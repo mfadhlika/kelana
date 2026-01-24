@@ -1,5 +1,8 @@
 package com.fadhlika.kelana.integration;
 
+import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -19,9 +22,9 @@ import com.fadhlika.kelana.dto.owntracks.Message;
 import com.fadhlika.kelana.dto.owntracks.Request;
 import com.fadhlika.kelana.dto.owntracks.Tour;
 import com.fadhlika.kelana.dto.owntracks.Waypoint;
+import com.fadhlika.kelana.service.UserService;
 
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -31,11 +34,31 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = KelanaApplication.class)
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@TestPropertySource(locations = "classpath:test.properties")
 @TestInstance(Lifecycle.PER_CLASS)
 public class OwntracksControllerIntegrationTest {
   @Autowired
   private TestRestTemplate testRestTemplate;
+
+  @Autowired
+  private Flyway flyway;
+
+  @Autowired
+  private UserService userService;
+
+  @BeforeEach
+  public void migrateDatabase() throws Exception {
+    clearDatabase();
+
+    flyway.migrate();
+
+    userService.createUser("test", "test");
+  }
+
+  @AfterAll
+  public void clearDatabase() {
+    flyway.clean();
+  }
 
   @Test
   public void publishLocation() throws Exception {

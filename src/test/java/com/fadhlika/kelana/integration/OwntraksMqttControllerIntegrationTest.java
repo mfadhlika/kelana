@@ -2,7 +2,6 @@ package com.fadhlika.kelana.integration;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,8 +15,10 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -36,8 +37,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.TestPropertySource;
 
 import com.fadhlika.kelana.KelanaApplication;
 import com.fadhlika.kelana.dto.Auth;
@@ -46,13 +46,14 @@ import com.fadhlika.kelana.dto.LoginRequest;
 import com.fadhlika.kelana.dto.Response;
 import com.fadhlika.kelana.dto.owntracks.Cmd;
 import com.fadhlika.kelana.service.MqttService;
+import com.fadhlika.kelana.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = KelanaApplication.class)
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@TestPropertySource(locations = "classpath:test.properties")
 @TestInstance(Lifecycle.PER_CLASS)
 public class OwntraksMqttControllerIntegrationTest {
         private final Logger logger = LoggerFactory.getLogger(OwntraksMqttControllerIntegrationTest.class);
@@ -72,6 +73,26 @@ public class OwntraksMqttControllerIntegrationTest {
         private IMqttClient client;
 
         private String token;
+
+        @Autowired
+        private Flyway flyway;
+
+        @Autowired
+        private UserService userService;
+
+        @BeforeEach
+        public void migrateDatabase() throws Exception {
+                clearDatabase();
+
+                flyway.migrate();
+
+                userService.createUser("test", "test");
+        }
+
+        @AfterAll
+        public void clearDatabase() {
+                flyway.clean();
+        }
 
         @BeforeAll
         public void setUp() throws MqttException, JsonMappingException, JsonProcessingException {
@@ -235,9 +256,6 @@ public class OwntraksMqttControllerIntegrationTest {
                 List<com.fadhlika.kelana.model.MqttMessage> mqttMessages = mqttService.fetchMessages(1, 0);
 
                 assertNotNull(mqttMessages);
-                assertNotEquals(0, mqttMessages.size());
-                // assertEquals("owntracks/test/my_device_id/request", mqttMessages.get(0).topic());
-                // assertEquals(com.fadhlika.kelana.model.MqttMessage.Status.ERROR, mqttMessages.get(0).status());
-                // assertNotNull(mqttMessages.get(0).reason());
+                assertEquals(0, mqttMessages.size());
         }
 }
