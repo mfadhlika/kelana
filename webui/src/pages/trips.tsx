@@ -14,16 +14,12 @@ import { toast } from "sonner";
 
 export default function TripsPage() {
     const [count, setCount] = useState<number>(0);
-    const [trips, setTrips] = useState<FeatureCollection<MultiLineString, TripProperties>>({ type: 'FeatureCollection', features: [] });
+    const [trips, setTrips] = useState<FeatureCollection<MultiLineString, TripProperties>>();
 
     useEffect(() => {
         tripService.fetchTrips()
-            .then(res => {
-                setTrips(res.data);
-            })
-            .catch(err => {
-                toast.error("faled to fetch trips", err);
-            });
+            .then(res => setTrips(res.data))
+            .catch(err => toast.error("faled to fetch trips", err));
     }, [count]);
 
     const handleDelete = (id: number) => {
@@ -43,7 +39,7 @@ export default function TripsPage() {
             </Header>
             <div className="flex-1 grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
                 {
-                    trips.features.map((trip) => {
+                    trips?.features.map((trip) => {
                         const props = trip.properties as TripProperties;
                         return (
                             <Card key={trip.properties.uuid} className="h-min">
