@@ -1,0 +1,14 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    ports:
+      - '1883:1883'
+    volumes:
+      - '.docker/mosquitto:/mosquitto/config'
+  postgis:
+    image: 'postgis/postgis'
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=kelana
+      - POSTGRES_PASSWORD=kelana
