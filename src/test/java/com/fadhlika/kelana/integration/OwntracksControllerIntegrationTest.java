@@ -48,16 +48,11 @@ public class OwntracksControllerIntegrationTest {
 
   @BeforeEach
   public void migrateDatabase() throws Exception {
-    clearDatabase();
+    flyway.clean();
 
     flyway.migrate();
 
     userService.createUser("test", "test");
-  }
-
-  @AfterAll
-  public void clearDatabase() {
-    flyway.clean();
   }
 
   @Test
@@ -66,13 +61,13 @@ public class OwntracksControllerIntegrationTest {
     com.fadhlika.kelana.dto.owntracks.Location location = new com.fadhlika.kelana.dto.owntracks.Location(10, 50, 95,
         null, 270, -1.23456,
         12.34567, null, null,
-        null, 1672531200, null, 15, null, null, null, null, null, null, null, null, null, new ArrayList<>() {
+        "NE", 1672531200, 30, 15, 100.664, null, null, null, "w", null, null, null, null, new ArrayList<>() {
           {
             add("driving");
           }
         }, null, null,
         0,
-        null, null);
+        1, null);
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);

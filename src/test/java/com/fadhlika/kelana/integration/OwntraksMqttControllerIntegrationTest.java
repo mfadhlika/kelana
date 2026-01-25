@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -52,7 +53,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = KelanaApplication.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = KelanaApplication.class, properties = {
+                "mqtt.enable=true" })
 @TestPropertySource(locations = "classpath:test.properties")
 @TestInstance(Lifecycle.PER_CLASS)
 public class OwntraksMqttControllerIntegrationTest {
@@ -81,17 +83,12 @@ public class OwntraksMqttControllerIntegrationTest {
         private UserService userService;
 
         @BeforeEach
-        public void migrateDatabase() throws Exception {
-                clearDatabase();
+        public void clearDatabase() {
+                flyway.clean();
 
                 flyway.migrate();
 
                 userService.createUser("test", "test");
-        }
-
-        @AfterAll
-        public void clearDatabase() {
-                flyway.clean();
         }
 
         @BeforeAll
@@ -129,19 +126,9 @@ public class OwntraksMqttControllerIntegrationTest {
         @Test
         public void publishLocation() throws MqttPersistenceException, MqttException, InterruptedException,
                         JsonMappingException, JsonProcessingException {
-                MqttMessage msg = new MqttMessage("""
-                                {
-                                  "_type": "location",
-                                  "tid": "my_device_id",
-                                  "tst": 1672532200,
-                                  "lat": -1.23456,
-                                  "lon": 12.34567,
-                                  "acc": 10,
-                                  "alt": 50,
-                                  "batt": 95,
-                                  "vel": 15,
-                                  "cog": 270
-                                }""".getBytes());
+                MqttMessage msg = new MqttMessage(
+                                "{\"batt\":40,\"lon\":12.34567,\"acc\":4,\"bs\":1,\"inrids\":[],\"created_at\":1768712755,\"p\":100.664,\"vac\":30,\"inregions\":[],\"lat\":-1.23456,\"topic\":\"owntracks/owntracks/iphone\",\"t\":\"u\",\"motionactivities\":[\"stationary\"],\"conn\":\"w\",\"m\":1,\"tst\":1672532200,\"alt\":-16,\"_type\":\"location\",\"tid\":\"NE\"}"
+                                                .getBytes());
                 client.publish("owntracks/test/my_device_id", msg);
 
                 Thread.sleep(5000);
