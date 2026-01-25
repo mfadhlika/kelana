@@ -44,9 +44,6 @@ public class OwntracksMqttController {
     @Autowired
     private MqttService mqttService;
 
-    @Autowired
-    private MqttGateway mqttGateway;
-
     @ServiceActivator(inputChannel = "mqttInboundChannel")
     public void handleMessage(String payload, @Header(MqttHeaders.RECEIVED_TOPIC) String topic,
             @Header(MqttHeaders.ID) String id) {
@@ -86,27 +83,10 @@ public class OwntracksMqttController {
                     @SuppressWarnings("unchecked")
                     List<com.fadhlika.kelana.dto.owntracks.Message> messages = (List<com.fadhlika.kelana.dto.owntracks.Message>) value;
                     for (com.fadhlika.kelana.dto.owntracks.Message msg : messages) {
-                        String resPayload = mapper.writeValueAsString(message);
-                        switch (msg) {
-                            case com.fadhlika.kelana.dto.owntracks.Cmd e:
-                                mqttGateway.publish(String.format("owntracks/%s/%s/cmd", username, deviceId),
-                                        resPayload);
-                                break;
-                            default:
-                                break;
-                        }
+                        owntracksService.sendCommand(user, deviceId, msg);
                     }
                 } else {
-                    com.fadhlika.kelana.dto.owntracks.Message msg = (com.fadhlika.kelana.dto.owntracks.Message) value;
-                    String resPayload = mapper.writeValueAsString(msg);
-                    switch (msg) {
-                        case com.fadhlika.kelana.dto.owntracks.Cmd e:
-                            mqttGateway.publish(String.format("owntracks/%s/%s/cmd", username, deviceId),
-                                    resPayload);
-                            break;
-                        default:
-                            break;
-                    }
+                    owntracksService.sendCommand(user, deviceId, (com.fadhlika.kelana.dto.owntracks.Message) value);
                 }
             }
 
