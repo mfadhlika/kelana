@@ -74,6 +74,7 @@ public class Location {
     private List<String> motions;
     private BatteryState batteryState = BatteryState.UNKNOWN;
     private Double battery;
+    private Double pressure;
     private String ssid;
     private Integer importId;
     private String rawData;
@@ -216,6 +217,14 @@ public class Location {
 
     public void setBattery(double battery) {
         this.battery = battery;
+    }
+
+    public Double getPressure() {
+        return pressure;
+    }
+
+    public void setPressure(Double pressure) {
+        this.pressure = pressure;
     }
 
     public String getSsid() {

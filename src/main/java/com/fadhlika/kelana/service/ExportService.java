@@ -74,6 +74,7 @@ public class ExportService {
                                 location.getMotions(),
                                 location.getBatteryState().toString(),
                                 location.getBattery(),
+                                location.getPressure(),
                                 location.getDeviceId(),
                                 location.getSsid(),
                                 location.getGeocode(),

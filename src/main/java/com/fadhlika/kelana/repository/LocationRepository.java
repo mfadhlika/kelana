@@ -69,6 +69,7 @@ public class LocationRepository {
             location.setVerticalAccuracy(rs.getInt("vertical_accuracy"));
             location.setBatteryState(rs.getInt("battery_state"));
             location.setBattery(rs.getDouble("battery"));
+            location.setPressure(rs.getDouble("pressure"));
             location.setSsid(rs.getString("ssid"));
             location.setTimestamp(rs.getObject("timestamp", OffsetDateTime.class).toZonedDateTime());
             location.setCourseAccuracy(rs.getInt("course_accuracy"));
@@ -109,6 +110,7 @@ public class LocationRepository {
                 motions,
                 battery_state,
                 battery,
+                pressure,
                 ssid,
                 timestamp,
                 raw_data,
@@ -121,8 +123,8 @@ public class LocationRepository {
         sqlBuilder
                 .append("""
                         :user_id, :device_id, ST_GeomFromText(:geometry), :altitude, :course, :course_accuracy,
-                        :speed, :accuracy, :vertical_accuracy, :motions::text[], :battery_state, :battery, :ssid, :timestamp,
-                        :raw_data::json, :created_at, :import_id, :geocode::json)
+                        :speed, :accuracy, :vertical_accuracy, :motions::text[], :battery_state, :battery, :pressure,
+                        :ssid, :timestamp, :raw_data::json, :created_at, :import_id, :geocode::json)
                         ON CONFLICT (user_id, device_id, geometry, timestamp, import_id) DO UPDATE SET
                                     altitude = excluded.altitude,
                                     course = excluded.course,
@@ -133,6 +135,7 @@ public class LocationRepository {
                                     motions = excluded.motions,
                                     battery_state = excluded.battery_state,
                                     battery = excluded.battery,
+                                    pressure = excluded.pressure,
                                     ssid = excluded.ssid,
                                     raw_data = excluded.raw_data,
                                     created_at = excluded.created_at,
@@ -163,6 +166,7 @@ public class LocationRepository {
         stmt.param("motions", motionParam)
                 .param("battery_state", location.getBatteryState().value)
                 .param("battery", location.getBattery())
+                .param("pressure", location.getPressure())
                 .param("ssid", location.getSsid())
                 .param("timestamp", location.getTimestamp().toOffsetDateTime())
                 .param("raw_data", location.getRawData())
@@ -298,6 +302,7 @@ public class LocationRepository {
                     motions,
                     battery_state,
                     battery,
+                    pressure,
                     ssid,
                     raw_data::json AS raw_data,
                     timestamp,

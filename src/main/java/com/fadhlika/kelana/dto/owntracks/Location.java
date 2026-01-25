@@ -58,6 +58,8 @@ public record Location(
             l.setBatteryState(this.bs());
         if (this.batt() != null)
             l.setBattery(this.batt());
+        if (this.p() != null)
+            l.setPressure(this.p());
         if (this.cog() != null)
             l.setCourse(this.cog());
         if (this.acc() != null)

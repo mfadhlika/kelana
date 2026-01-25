@@ -127,6 +127,7 @@ public class LocationService {
                 location.getMotions(),
                 bs,
                 location.getBattery(),
+                location.getPressure(),
                 location.getDeviceId(),
                 location.getSsid(),
                 location.getGeocode(),
