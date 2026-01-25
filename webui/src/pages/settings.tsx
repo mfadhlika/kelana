@@ -13,9 +13,9 @@ import { useNavigate } from "react-router";
 import { Header } from "@/components/header";
 import { toast } from "sonner";
 import type { Integration } from "@/types/integration";
-import type { Response } from "@/types/response";
 import { useAuthStore } from "@/hooks/use-auth";
 import { backupService } from "@/services/backup-service";
+import { integrationService } from "@/services/integration-service";
 
 const accountFormSchema = z.object({
     username: z.string(),
@@ -151,6 +151,10 @@ function OwntracksIntegrationItem({ integration, doSubmit }: { integration: Inte
                 )} />
                 <Button type="submit" className="w-[100px] self-end" disabled={owntracksForm.formState.isSubmitting}>Save</Button>
             </form>
+            <div style={{ "width": "100%", "display": "flex", "justifyContent": "space-between", "marginTop": "2.5rem" }}>
+                <span>Publish waypoints</span>
+                <Button onClick={() => integrationService.sendOwntracksCommand("setWaypoints")}>Publish waypoints</Button>
+            </div>
         </Form>
     );
 }
@@ -195,8 +199,8 @@ function IntegrationSettingsTab() {
     });
 
     useEffect(() => {
-        axiosInstance.get<Response<Integration>>("v1/integration").then(res => {
-            setIntegration({ ...res.data.data });
+        integrationService.fetchIntegration().then(res => {
+            setIntegration({ ...res.data });
         }).catch(err => {
             console.error(err);
             toast.error("failed fetch integration settings", err);
@@ -204,7 +208,7 @@ function IntegrationSettingsTab() {
     }, []);
 
     const doSubmit = (data: Integration) => {
-        axiosInstance.put("v1/integration", data)
+        integrationService.submitIntegration(data)
             .then(res => {
                 setIntegration({ ...res.data });
                 toast.success("Integration saved succesfully");
