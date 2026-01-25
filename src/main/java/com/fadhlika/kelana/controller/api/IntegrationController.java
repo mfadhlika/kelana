@@ -3,6 +3,7 @@ package com.fadhlika.kelana.controller.api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,12 +14,18 @@ import com.fadhlika.kelana.dto.SaveIntegrationRequest;
 import com.fadhlika.kelana.model.Integration;
 import com.fadhlika.kelana.model.User;
 import com.fadhlika.kelana.service.IntegrationService;
+import com.fadhlika.kelana.service.OwntracksService;
+
+import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequestMapping("/api/v1/integration")
 public class IntegrationController {
     @Autowired
     private IntegrationService integrationService;
+
+    @Autowired
+    private OwntracksService owntracksService;
 
     @PutMapping
     public Response<Integration> saveIntegration(@RequestBody SaveIntegrationRequest request) {
@@ -45,4 +52,14 @@ public class IntegrationController {
         return new Response<>(new Integration(integration.userId(), integration.owntracksUsername(), null,
                 integration.overlandApiKey()));
     }
+
+    @PostMapping("/owntracks/cmd/{action}")
+    public Response<?> sendOwntracksCommand(@PathVariable String action) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        owntracksService.handleSendCommand(user, action);
+
+        return new Response<>("success");
+    }
+
 }

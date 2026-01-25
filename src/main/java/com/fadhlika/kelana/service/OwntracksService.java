@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.locationtech.jts.algorithm.MinimumBoundingCircle;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.locationtech.jts.geom.Coordinate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +20,8 @@ import com.fadhlika.kelana.dto.owntracks.Cmd;
 import com.fadhlika.kelana.dto.owntracks.Message;
 import com.fadhlika.kelana.dto.owntracks.Waypoint;
 import com.fadhlika.kelana.dto.owntracks.Waypoints;
+import com.fadhlika.kelana.exception.InternalErrorException;
+import com.fadhlika.kelana.gateways.MqttGateway;
 import com.fadhlika.kelana.model.Region;
 import com.fadhlika.kelana.model.Trip;
 import com.fadhlika.kelana.model.User;
@@ -42,6 +44,12 @@ public class OwntracksService {
 
     @Autowired
     private RegionService regionService;
+
+    @Autowired
+    private MqttGateway mqttGateway;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     public Optional<?> handleMessage(User user, String deviceId, com.fadhlika.kelana.dto.owntracks.Message message)
             throws JsonProcessingException {
@@ -83,7 +91,7 @@ public class OwntracksService {
                 })
                 .toList();
         if (!waypoints.isEmpty())
-            res.add(new Cmd("setWaypoints", new Waypoints(null, waypoints)));
+            res.add(Cmd.setWaypoints(new Waypoints(null, waypoints)));
 
         return Optional.of(res);
     }
@@ -102,7 +110,7 @@ public class OwntracksService {
                                         .atZone(ZoneOffset.UTC),
                                 true));
 
-                return Optional.of(new com.fadhlika.kelana.dto.owntracks.Cmd("response", 200,
+                return Optional.of(com.fadhlika.kelana.dto.owntracks.Cmd.responseTour(
                         new com.fadhlika.kelana.dto.owntracks.Tour(trip.title(),
                                 trip.startAt(),
                                 trip.endAt(), trip.uuid(),
@@ -117,7 +125,7 @@ public class OwntracksService {
                                 t.endAt(), t.uuid(),
                                 String.format("%s/trips/%s", baseUrl, t.uuid())))
                         .toList();
-                return Optional.of(new com.fadhlika.kelana.dto.owntracks.Cmd("response", tours));
+                return Optional.of(com.fadhlika.kelana.dto.owntracks.Cmd.responseTours(tours));
             case "untour":
                 logger.info("request tour deletion");
                 this.tripService.deleteTrip(request.uuid());
@@ -138,6 +146,54 @@ public class OwntracksService {
         } catch (Exception ex) {
             ex.printStackTrace();
             throw ex;
+        }
+    }
+
+    public void handleSendCommand(User user, String action) {
+        try {
+            switch (action) {
+                case "setWaypoints":
+                    List<Waypoint> waypoints = this.regionService.fetchRegions(user.getId()).stream()
+                            .map(region -> {
+                                Coordinate coord = region.getGeometry().getCoordinate();
+
+                                return new Waypoint(
+                                        region.getDesc(),
+                                        coord.y,
+                                        coord.x,
+                                        (int) region.getRadius(),
+                                        Math.toIntExact(region.getCreatedAt().toEpochSecond()),
+                                        region.getBeaconUUID(),
+                                        region.getBeaconMajor(),
+                                        region.getBeaconMinor(),
+                                        region.getRid());
+                            })
+                            .toList();
+
+                    Cmd cmd = Cmd.setWaypoints(new Waypoints(null, waypoints));
+                    sendCommand(user, action, cmd);
+                    break;
+                default:
+                    break;
+            }
+        } catch (MqttException | JsonProcessingException ex) {
+            throw new InternalErrorException(ex.getMessage());
+        }
+    }
+
+    public void sendCommand(User user, String deviceId, com.fadhlika.kelana.dto.owntracks.Message message)
+            throws MqttException, JsonProcessingException {
+        String payload = mapper.writeValueAsString(message);
+
+        switch (message) {
+            case com.fadhlika.kelana.dto.owntracks.Cmd e:
+                String topic = String.format("owntracks/%s/%s/cmd", user.getUsername(), deviceId);
+
+                mqttGateway.publish(topic, payload);
+                break;
+            default:
+                logger.debug("not a command");
+                break;
         }
     }
 }

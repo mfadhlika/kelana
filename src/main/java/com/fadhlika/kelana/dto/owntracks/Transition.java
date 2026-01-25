@@ -1,15 +1,15 @@
 package com.fadhlika.kelana.dto.owntracks;
 
 public record Transition(
-                int wtst,
-                double lat,
-                double lon,
-                int tst,
-                int acc,
-                String tid,
-                String event,
-                String desc,
-                String t,
-                String rid) implements Message {
+        int wtst,
+        double lat,
+        double lon,
+        int tst,
+        int acc,
+        String tid,
+        String event,
+        String desc,
+        String t,
+        String rid) implements Message {
 
 }
