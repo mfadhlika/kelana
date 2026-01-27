@@ -4,14 +4,15 @@ import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Response } from "@/types/response";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import type { Login as LoginRequest } from "@/types/requests/login";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormControl, FormField, FormItem, FormLabel, Form, FormMessage } from "@/components/ui/form";
 import type { AxiosError } from "axios";
 import { loginFormSchema } from "@/types/schema/login";
 import { authService } from "@/services/auth-service";
 import { useAuthStore } from "@/hooks/use-auth";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { toast } from "sonner";
 
 export default function LoginPage() {
     const { userInfo, login } = useAuthStore();
@@ -28,8 +29,7 @@ export default function LoginPage() {
             navigate("/");
         })
             .catch((err: AxiosError<Response>) => {
-                console.error(err);
-                loginForm.setError("root", { message: err.response?.data?.message });
+                toast.error(err.response?.data?.message);
             });
     }
 
@@ -47,34 +47,27 @@ export default function LoginPage() {
                 <div className="flex flex-col gap-6">
                     <Card className="w-full max-w-sm">
                         <CardContent>
-                            <Form {...loginForm}>
-                                <form onSubmit={loginForm.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                                    <FormField control={loginForm.control} name="username" render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Username</FormLabel>
-                                            <FormControl>
-                                                <Input type="text" autoComplete="username"  {...field} />
-                                            </FormControl>
-                                        </FormItem>
+                            <form onSubmit={loginForm.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+                                <FieldGroup>
+                                    <Controller control={loginForm.control} name="username" render={({ field }) => (
+                                        <Field>
+                                            <FieldLabel htmlFor={`form-login-${field.name}`}>Username</FieldLabel>
+                                            <Input id={`form-login-${field.name}`} type="text" autoComplete="username"  {...field} />
+                                        </Field>
                                     )} />
-                                    <FormField control={loginForm.control} name="password" render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Password</FormLabel>
-                                            <FormControl>
-                                                <Input type="password" autoComplete="password"  {...field} />
-                                            </FormControl>
-                                        </FormItem>
+                                    <Controller control={loginForm.control} name="password" render={({ field }) => (
+                                        <Field>
+                                            <FieldLabel htmlFor={`form-login-${field.name}`}>Password</FieldLabel>
+                                            <Input id={`form-login-${field.name}`} type="password" autoComplete="password"  {...field} />
+                                        </Field>
                                     )} />
-                                    <div className="grid gap-3">
-                                        <Button type="submit" className="w-full">Login</Button>
-                                        {loginForm.formState.errors.root?.message && <FormMessage>{loginForm.formState.errors.root?.message}</FormMessage>}
-                                    </div>
-                                </form>
-                            </Form>
+                                    <Button type="submit" className="w-full">Login</Button>
+                                </FieldGroup>
+                            </form>
                         </CardContent>
                     </Card>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
