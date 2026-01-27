@@ -123,30 +123,29 @@ public class OwntracksControllerIntegrationTest {
     assertEquals("2022-08-01T05:35:58", cmd.tour().from());
     assertEquals("2022-08-02T15:00:58", cmd.tour().to());
 
-    // req = new Request("tours", null, null);
+    req = new Request("tours", null, null);
 
-    // request = new HttpEntity<>(req, headers);
+    request = new HttpEntity<>(req, headers);
 
-    // res = testRestTemplate
-    // .withBasicAuth("owntracks", "owntracks")
-    // .exchange("/api/owntracks", HttpMethod.POST, request, Cmd.class);
+    res = testRestTemplate
+        .withBasicAuth("owntracks", "owntracks")
+        .exchange("/api/owntracks", HttpMethod.POST, request, Cmd.class);
 
-    // assertEquals(HttpStatusCode.valueOf(200), res.getStatusCode());
+    assertEquals(HttpStatusCode.valueOf(200), res.getStatusCode());
 
-    // msg = res.getBody();
+    msg = res.getBody();
 
-    // cmd = (Cmd) msg;
+    cmd = (Cmd) msg;
 
-    // assertNotNull(cmd);
-    // assertEquals("cmd", cmd._type()); // _type not deserialized even though it
-    // s
+    assertNotNull(cmd);
+    // assertEquals("cmd", cmd._type()); // _type not deserialized even though it's
     // there on the payload
-    // assertEquals("response", cmd.action());
-    // assertEquals("tours", cmd.request());
-    // assertEquals(1, cmd.tours().size());
-    // assertEquals("Meeting with C. in Essen", cmd.tours().get(0).label());
-    // assertEquals("2022-08-01T05:35:58", cmd.tours().get(0).from());
-    // assertEquals("2022-08-02T15:00:58", cmd.tours().get(0).to());
+    assertEquals("response", cmd.action());
+    assertEquals("tours", cmd.request());
+    assertEquals(1, cmd.tours().size());
+    assertEquals("Meeting with C. in Essen", cmd.tours().get(0).label());
+    assertEquals("2022-08-01T05:35:58", cmd.tours().get(0).from());
+    assertEquals("2022-08-02T15:00:58", cmd.tours().get(0).to());
   }
 
   @Test
