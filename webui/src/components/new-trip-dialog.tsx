@@ -10,8 +10,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Loader2Icon, Map } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form.tsx";
+import { Controller, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { cn, toISOLocal } from "@/lib/utils";
 import { toast } from "sonner";
@@ -24,6 +23,7 @@ import type { Trip } from "@/types/requests/trip";
 import { tripFormSchema } from "@/types/schema/trip";
 import { tripService } from "@/services/trip-service";
 import { v4 as uuidv4 } from 'uuid'; // For version 4 (random)
+import { Field, FieldError, FieldLabel } from "./ui/field";
 
 export type NewTripDialogProps = React.ComponentProps<"div"> & {
     onClose?: () => void,
@@ -92,55 +92,44 @@ export const NewTripDialog = ({ className, onClose, trip, children }: NewTripDia
                 </DialogHeader>
                 <div className="flex gap-4 flex-col md:flex-row">
                     <PreviewMaps className="rounded-md min-h-[200px] flex-1" locations={locations} disableDrag />
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 space-y-8">
-                            <FormField control={form.control} name="title" render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Title</FormLabel>
-                                    <FormControl>
-                                        <Input type="text" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 space-y-8">
+                        <Controller control={form.control} name="title" render={({ field }) => (
+                            <Field>
+                                <FieldLabel>Title</FieldLabel>
+                                <Input type="text" {...field} />
+                            </Field>
+                        )} />
+                        <Controller control={form.control} name="startAt"
+                            render={({ field, fieldState }) => (
+                                <Field>
+                                    <FieldLabel>Start at</FieldLabel>
+                                    <Input type="datetime-local" ref={field.ref} value={toISOLocal(field.value)} onChange={e => field.onChange(new Date(e.target.value))} />
+                                    {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
+                                </Field>
                             )} />
-                            <FormField control={form.control} name="startAt"
-                                render={({ field, fieldState }) => (
-                                    <FormItem>
-                                        <FormLabel>Start at</FormLabel>
-                                        <FormControl>
-                                            <Input type="datetime-local" ref={field.ref} value={toISOLocal(field.value)} onChange={e => field.onChange(new Date(e.target.value))} />
-                                        </FormControl>
-                                        {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
-                                    </FormItem>
-                                )} />
-                            <FormField control={form.control} name="endAt"
-                                render={({ field, fieldState }) => (
-                                    <FormItem>
-                                        <FormLabel>End at</FormLabel>
-                                        <FormControl>
-                                            <Input type="datetime-local" ref={field.ref} value={toISOLocal(field.value)} onChange={e => field.onChange(new Date(e.target.value))} />
-                                        </FormControl>
-                                        {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
-                                    </FormItem>
-                                )} />
-                            <FormField control={form.control} name="isPublic"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center gap-2">
-                                        <FormControl>
-                                            <Checkbox
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                        <FormLabel>Public</FormLabel>
-                                    </FormItem>
-                                )} />
-                            <Button type="submit" disabled={formState.isSubmitting}>
-                                {formState.isSubmitting && <Loader2Icon className="animate-spin" />}
-                                Save
-                            </Button>
-                        </form>
-                    </Form>
+                        <Controller control={form.control} name="endAt"
+                            render={({ field, fieldState }) => (
+                                <Field>
+                                    <FieldLabel>End at</FieldLabel>
+                                    <Input type="datetime-local" ref={field.ref} value={toISOLocal(field.value)} onChange={e => field.onChange(new Date(e.target.value))} />
+                                    {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
+                                </Field>
+                            )} />
+                        <Controller control={form.control} name="isPublic"
+                            render={({ field }) => (
+                                <Field className="flex flex-row items-center gap-2">
+                                    <Checkbox
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                    />
+                                    <FieldLabel>Public</FieldLabel>
+                                </Field>
+                            )} />
+                        <Button type="submit" disabled={formState.isSubmitting}>
+                            {formState.isSubmitting && <Loader2Icon className="animate-spin" />}
+                            Save
+                        </Button>
+                    </form>
                 </div>
             </DialogContent>
         </Dialog>

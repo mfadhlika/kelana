@@ -1,9 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { FormLabel, FormControl, FormItem, FormField, Form, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { axiosInstance } from "@/lib/request";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -16,6 +15,7 @@ import type { Integration } from "@/types/integration";
 import { useAuthStore } from "@/hooks/use-auth";
 import { backupService } from "@/services/backup-service";
 import { integrationService } from "@/services/integration-service";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 
 const accountFormSchema = z.object({
     username: z.string(),
@@ -66,50 +66,42 @@ function AccountSettingsTab() {
     }
 
     return (
-        <Form {...accountForm}>
-            <form onSubmit={accountForm.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Account</CardTitle>
-                        <CardDescription>
-                            Change your username and password here. After saving, you&apos;ll be logged
-                            out.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="grid gap-6">
-                        <FormField control={accountForm.control} name="username" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Username</FormLabel>
-                                <FormControl>
-                                    <Input type="text" autoComplete="username"  {...field} />
-                                </FormControl>
-                            </FormItem>
-                        )} />
-                        <FormField control={accountForm.control} name="password" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Password</FormLabel>
-                                <FormControl>
-                                    <Input type="password" autoComplete="password"  {...field} />
-                                </FormControl>
-                            </FormItem>
-                        )} />
-                        <FormField control={accountForm.control} name="confirmPassword" render={({ field, fieldState }) => (
-                            <FormItem>
-                                <FormLabel>Confirm Password</FormLabel>
-                                <FormControl>
-                                    <Input type="password" autoComplete="password" {...field} />
-                                </FormControl>
-                                {fieldState.error && <FormMessage>{fieldState.error.message}</FormMessage>}
-                            </FormItem>
-                        )} />
-                    </CardContent>
-                    <CardFooter>
-                        <Button type="submit" className="w-[100px] self-end" disabled={accountForm.formState.isSubmitting}>Submit</Button>
-                    </CardFooter>
+        <form onSubmit={accountForm.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Account</CardTitle>
+                    <CardDescription>
+                        Change your username and password here. After saving, you&apos;ll be logged
+                        out.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-6">
+                    <Controller control={accountForm.control} name="username" render={({ field }) => (
+                        <Field>
+                            <FieldLabel>Username</FieldLabel>
+                            <Input type="text" autoComplete="username"  {...field} />
+                        </Field>
+                    )} />
+                    <Controller control={accountForm.control} name="password" render={({ field }) => (
+                        <Field>
+                            <FieldLabel>Password</FieldLabel>
+                            <Input type="password" autoComplete="password"  {...field} />
+                        </Field>
+                    )} />
+                    <Controller control={accountForm.control} name="confirmPassword" render={({ field, fieldState }) => (
+                        <Field>
+                            <FieldLabel>Confirm Password</FieldLabel>
+                            <Input type="password" autoComplete="password" {...field} />
+                            {fieldState.error && <FieldError>{fieldState.error.message}</FieldError>}
+                        </Field>
+                    )} />
+                </CardContent>
+                <CardFooter>
+                    <Button type="submit" className="w-[100px] self-end" disabled={accountForm.formState.isSubmitting}>Submit</Button>
+                </CardFooter>
 
-                </Card>
-            </form>
-        </Form>
+            </Card>
+        </form>
 
     );
 }
@@ -131,31 +123,29 @@ function OwntracksIntegrationItem({ integration, doSubmit }: { integration: Inte
     }
 
     return (
-        <Form {...owntracksForm}>
+        <>
             <form onSubmit={owntracksForm.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                <FormField control={owntracksForm.control} name="username" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Username</FormLabel>
-                        <FormControl>
-                            <Input type="text" autoComplete="username"  {...field} />
-                        </FormControl>
-                    </FormItem>
-                )} />
-                <FormField control={owntracksForm.control} name="password" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                            <Input type="password" autoComplete="password"  {...field} />
-                        </FormControl>
-                    </FormItem>
-                )} />
-                <Button type="submit" className="w-[100px] self-end" disabled={owntracksForm.formState.isSubmitting}>Save</Button>
+                <FieldGroup>
+                    <Controller control={owntracksForm.control} name="username" render={({ field }) => (
+                        <Field>
+                            <FieldLabel htmlFor="form-owntracks-username">Username</FieldLabel>
+                            <Input id="form-owntracks-username" type="text" autoComplete="username"  {...field} />
+                        </Field>
+                    )} />
+                    <Controller control={owntracksForm.control} name="password" render={({ field }) => (
+                        <Field>
+                            <FieldLabel htmlFor="form-owntracks-password">Password</FieldLabel>
+                            <Input id="form-owntracks-password" type="password" autoComplete="password"  {...field} />
+                        </Field>
+                    )} />
+                    <Button type="submit" className="w-[100px] self-end" disabled={owntracksForm.formState.isSubmitting}>Save</Button>
+                </FieldGroup>
             </form>
             <div style={{ "width": "100%", "display": "flex", "justifyContent": "space-between", "marginTop": "2.5rem" }}>
                 <span>Publish waypoints</span>
                 <Button onClick={() => integrationService.sendOwntracksCommand("setWaypoints")}>Publish waypoints</Button>
             </div>
-        </Form>
+        </>
     );
 }
 
@@ -175,19 +165,15 @@ function OverlandIntegrationItem({ integration, doSubmit }: { integration: Integ
     }
 
     return (
-        <Form {...overlandForm}>
-            <form onSubmit={overlandForm.handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                <FormField control={overlandForm.control} name="apiKey" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Api Key</FormLabel>
-                        <FormControl>
-                            <Input type="text" disabled {...field} />
-                        </FormControl>
-                    </FormItem>
-                )} />
-                <Button type="submit" className="w-[100px] self-end" disabled={overlandForm.formState.isSubmitting}>Reset</Button>
-            </form>
-        </Form>
+        <form onSubmit={overlandForm.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            <Controller control={overlandForm.control} name="apiKey" render={({ field }) => (
+                <Field>
+                    <FieldLabel>Api Key</FieldLabel>
+                    <Input type="text" disabled {...field} />
+                </Field>
+            )} />
+            <Button type="submit" className="w-[100px] self-end" disabled={overlandForm.formState.isSubmitting}>Reset</Button>
+        </form>
     );
 }
 

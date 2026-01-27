@@ -2,6 +2,7 @@ import { expect, vi, describe, it, beforeEach } from 'vitest';
 import { render, type RenderResult } from 'vitest-browser-react'
 import LoginPage from './login';
 import { BrowserRouter } from 'react-router';
+import { Toaster } from 'sonner';
 
 describe('login page', async () => {
     let loginPage: RenderResult;
@@ -10,6 +11,7 @@ describe('login page', async () => {
         loginPage = render(
             <BrowserRouter>
                 <LoginPage />
+                <Toaster />
             </BrowserRouter>
         );
     });
@@ -50,9 +52,9 @@ describe('login page', async () => {
                 message: 'success'
             });
 
-            await loginPage.getByRole("textbox", { name: "Username" }).fill("test");
-            await loginPage.getByRole("textbox", { name: "Password" }).fill("test");
-            await loginPage.getByRole("button", { name: "Login" }).click();
+            await loginPage.getByLabelText("Username").fill("test");
+            await loginPage.getByLabelText("Password").fill("test");
+            await loginPage.getByText("Login").click();
 
             expect(mocks.login).toHaveBeenCalledWith({
                 username: 'test',
@@ -71,9 +73,9 @@ describe('login page', async () => {
                 }
             });
 
-            await loginPage.getByRole("textbox", { name: "Username" }).fill("test");
-            await loginPage.getByRole("textbox", { name: "Password" }).fill("test");
-            await loginPage.getByRole("button", { name: "Login" }).click();
+            await loginPage.getByLabelText("Username").fill("test");
+            await loginPage.getByLabelText("Password").fill("nottest");
+            await loginPage.getByText("Login").click();
 
             expect(mocks.login).toHaveBeenCalledWith({
                 username: 'test',
