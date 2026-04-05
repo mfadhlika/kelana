@@ -21,7 +21,6 @@ async function logout() {
     try {
         await authService.logout();
         useAuthStore.getState().logout();
-        toast.error("Session expired. Please relogin");
 
         await router.navigate("/login", {
             replace: true
