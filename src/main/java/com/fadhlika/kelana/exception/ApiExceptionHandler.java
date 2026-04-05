@@ -21,13 +21,12 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response<Void>> handleException(Exception ex) {
-        logger.error("Exception caught: {}", ex.getMessage(), ex);
-
         if (ex.getClass().isAnnotationPresent(ResponseStatus.class)) {
             ResponseStatus status = ex.getClass().getAnnotation(ResponseStatus.class);
             return new ResponseEntity<>(new Response<>(ex.getMessage()), status.value());
         }
 
+        logger.error("Unannotated exception caught: {}", ex.getMessage(), ex);
         return new ResponseEntity<>(new Response<>(ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
