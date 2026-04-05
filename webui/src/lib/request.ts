@@ -28,6 +28,8 @@ async function logout() {
     } catch (err) {
         console.error(err);
         toast.error(`logging out failed: ${err}`);
+    } finally {
+        logoutPromise = null;
     }
 };
 
