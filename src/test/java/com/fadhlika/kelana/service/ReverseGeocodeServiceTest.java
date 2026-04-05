@@ -101,8 +101,6 @@ public class ReverseGeocodeServiceTest {
         doNothing().when(locationRepository).updateLocationGeocode(eq(1),
                 any(FeatureCollection.class));
 
-        when(placeRepository.fetchPlace(l.getGeometry())).thenReturn(Optional.empty());
-
         doNothing().when(placeRepository).createPlace(any(Place.class));
 
         reverseGeocodeService.processReverseGeocode();
@@ -113,8 +111,6 @@ public class ReverseGeocodeServiceTest {
                 Optional.empty(),
                 Optional.empty(), Optional.empty(),
                 Optional.empty(), Optional.empty(), Optional.of(false));
-
-        verify(placeRepository, times(1)).fetchPlace(l.getGeometry());
 
         verify(placeRepository, times(1)).createPlace(any(Place.class));
 

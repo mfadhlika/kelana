@@ -87,7 +87,9 @@ public class PlaceRepository {
                     state,
                     geodata,
                     created_at
-                ) VALUES (?, ST_GeomFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::json, ?)""")
+                ) VALUES (?, ST_GeomFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::json, ?)
+                ON CONFLICT (type, postcode, country_code, name, country, city, district, locality, street, state)
+                DO NOTHING""")
                 .param(place.provider())
                 .param(place.geometry().toText())
                 .param(place.type())

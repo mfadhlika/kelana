@@ -17,7 +17,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
 
 import com.fadhlika.kelana.dto.Feature;
 import com.fadhlika.kelana.dto.FeatureCollection;
@@ -45,9 +44,6 @@ public class ReverseGeocodeService {
     private PlaceRepository placeRepository;
 
     @Autowired
-    private PlatformTransactionManager transactionManager;
-
-    @Autowired
     private ObjectMapper mapper;
 
     @Async
@@ -64,7 +60,6 @@ public class ReverseGeocodeService {
 
             int i = 0;
             while (true) {
-                TransactionStatus status = transactionManager.getTransaction(null);
                 Optional<Location> location = locationRepository
                         .findLocation(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
                                 Optional.empty(), Optional.empty(), Optional.of(false));
@@ -80,9 +75,6 @@ public class ReverseGeocodeService {
                     locationRepository.updateLocationGeocode(l.getId(), geocode);
 
                     for (Feature feature : geocode.features()) {
-                        if (placeRepository.fetchPlace(feature.getGeometry()).isPresent())
-                            continue;
-
                         GeocodeProperties props = feature.convertProperties(new TypeReference<GeocodeProperties>() {
                         });
 
@@ -106,10 +98,8 @@ public class ReverseGeocodeService {
                                 })));
                     }
 
-                    transactionManager.commit(status);
                 } catch (Exception ex) {
                     logger.error("error: {}, skipping...", ex.getMessage());
-                    transactionManager.rollback(status);
                 }
 
                 i++;
