@@ -16,9 +16,9 @@ public class RegionService {
     @Autowired
     private RegionRepository regionRepository;
 
-    public void createRegion(Region region) {
+    public void createRegions(List<Region> regions) {
         try {
-            regionRepository.createRegion(region);
+            regionRepository.createRegions(regions);
         } catch (DataAccessException e) {
             throw new InternalErrorException(e.getMessage());
         } catch (JsonProcessingException e) {

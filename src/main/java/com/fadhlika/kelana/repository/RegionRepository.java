@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.locationtech.jts.geom.Geometry;
@@ -52,26 +53,35 @@ public class RegionRepository {
                 rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
     };
 
-    public void createRegion(Region region) throws JsonProcessingException {
+    public void createRegions(List<Region> regions) throws JsonProcessingException {
+        List<String> params = new ArrayList<>();
+        List<Object> values = new ArrayList<>();
+
+        for (Region region : regions) {
+            params.add("(?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?::jsonb, ?)");
+            values.add(region.getUserId());
+            values.add(region.getDesc());
+            values.add(region.getGeometry().toText());
+            values.add(region.getBeaconUUID());
+            values.add(region.getBeaconMajor());
+            values.add(region.getBeaconMinor());
+            values.add(region.getRid());
+            values.add(mapper.writeValueAsString(region.getGeocode()));
+            values.add(region.getCreatedAt().toOffsetDateTime());
+        }
         jdbcClient
-                .sql("""
-                        INSERT INTO region(user_id, "desc", geometry, beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at)
-                        VALUES (?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?::jsonb, ?)
-                        ON CONFLICT (rid) DO UPDATE SET
-                            "desc" = excluded."desc",
-                            geometry = excluded.geometry,
-                            beacon_uuid = excluded.beacon_uuid,
-                            beacon_major = excluded.beacon_major,
-                            beacon_minor = excluded.beacon_minor""")
-                .param(region.getUserId())
-                .param(region.getDesc())
-                .param(region.getGeometry().toText())
-                .param(region.getBeaconUUID())
-                .param(region.getBeaconMajor())
-                .param(region.getBeaconMinor())
-                .param(region.getRid())
-                .param(mapper.writeValueAsString(region.getGeocode()))
-                .param(region.getCreatedAt().toOffsetDateTime())
+                .sql(String.format(
+                        """
+                                INSERT INTO region(user_id, "desc", geometry, beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at)
+                                VALUES %s
+                                ON CONFLICT (rid) DO UPDATE SET
+                                    "desc" = excluded."desc",
+                                    geometry = excluded.geometry,
+                                    beacon_uuid = excluded.beacon_uuid,
+                                    beacon_major = excluded.beacon_major,
+                                    beacon_minor = excluded.beacon_minor""",
+                        String.join(", ", params)))
+                .params(values)
                 .update();
     }
 

@@ -138,9 +138,13 @@ public class OwntracksService {
     public Optional<Void> handleMessageWaypoint(User user, String deviceId,
             com.fadhlika.kelana.dto.owntracks.Waypoint waypoint) {
         try {
-            regionService.createRegion(new Region(user.getId(), waypoint.desc(), waypoint.lat(), waypoint.lon(),
-                    waypoint.rad(), waypoint.uuid(), waypoint.major(), waypoint.minor(), waypoint.rid(),
-                    Instant.ofEpochSecond(waypoint.tst()).atZone(ZoneOffset.UTC)));
+            regionService.createRegions(new ArrayList<>() {
+                {
+                    add(new Region(user.getId(), waypoint.desc(), waypoint.lat(), waypoint.lon(),
+                            waypoint.rad(), waypoint.uuid(), waypoint.major(), waypoint.minor(), waypoint.rid(),
+                            Instant.ofEpochSecond(waypoint.tst()).atZone(ZoneOffset.UTC)));
+                }
+            });
 
             return Optional.empty();
         } catch (Exception ex) {
