@@ -1,4 +1,3 @@
-import { toISOLocal } from "./time";
-import { cn } from "./class";
+export { toISOLocal } from "./time";
+export { cn } from "./class";
 
-export { cn, toISOLocal };

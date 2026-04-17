@@ -7,7 +7,7 @@ import { MapLayers } from "@/components/map-layers";
 import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
-import { LayerCheckbox, useLayerState } from "@/components/layer-checkbox";
+import { LayerCheckbox } from "@/components/layer-checkbox";
 import * as turf from "@turf/turf";
 import type { PointProperties, RegionProperties } from "@/types/properties";
 import { MapContainer } from 'react-leaflet/MapContainer';
@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { locationService } from '@/services/location-service';
 import { useAuthStore } from '@/hooks/use-auth';
 import { regionService } from '@/services/region-service';
+import { useLayerState } from '@/hooks/use-layer-state';
 
 export default function MapsPage() {
     const { userInfo } = useAuthStore();
