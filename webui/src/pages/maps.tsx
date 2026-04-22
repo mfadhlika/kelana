@@ -133,7 +133,7 @@ export default function MapsPage() {
                         </Toggle>
                     </Header>
                 </MapControl>
-                <MapControl position='bottomright'>
+                <MapControl position='bottomright' disableClickPropagation disableScrollPropagation className='flex flex-col gap-2'>
                     <LayerCheckbox className='bg-sidebar' {...layerSettings} />
                 </MapControl>
                 <MapLayers locations={locations} lastKnowLocation={lastKnownLocation} regions={regions} bounded={bounded} onBoundsChange={handleBounds} {...layerSettings} />

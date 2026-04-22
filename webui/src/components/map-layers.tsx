@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { formatDistanceStrict, formatDistanceToNow } from "date-fns";
 import { MapControl } from "./map-control";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { DrawControl } from "./draw-control";
 
 export type MarkersProps = React.ComponentProps<"div"> & {
     locations: FeatureCollection<Point, PointProperties>,
@@ -303,6 +304,7 @@ export function MapLayers({
                     <Tooltip>{feature.properties?.desc}</Tooltip>
                 </Polygon>
             })}
+            <DrawControl />
         </FeatureGroup>}
     </>);
 }
