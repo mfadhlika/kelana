@@ -1,4 +1,3 @@
-import type { UUID } from "crypto";
 import type { FeatureCollection, Point } from "geojson";
 
 type PointProperties = {
@@ -33,7 +32,7 @@ type TripProperties = {
     title: string,
     startAt: string,
     endAt: string,
-    uuid: UUID,
+    uuid: string,
     public: boolean,
     publicUrl?: string
 }
@@ -52,7 +51,7 @@ type GeocodeProperties = {
 type RegionProperties = {
     desc: string,
     rid?: string,
-    beaconUUID?: UUID,
+    beaconUUID?: string,
     beaconMajor?: number,
     beaconMinor?: number
 }
