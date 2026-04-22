@@ -125,6 +125,9 @@ public class Region {
         this.beaconMajor = beaconMajor;
         this.beaconMinor = beaconMinor;
         this.rid = rid;
+        if (createdAt == null) {
+            createdAt = ZonedDateTime.now();
+        }
         this.createdAt = createdAt;
     }
 
@@ -160,6 +163,9 @@ public class Region {
         this.beaconMajor = beaconMajor;
         this.beaconMinor = beaconMinor;
         this.rid = rid;
+        if (createdAt == null) {
+            createdAt = ZonedDateTime.now();
+        }
         this.createdAt = createdAt;
     }
 
