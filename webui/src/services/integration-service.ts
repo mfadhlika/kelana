@@ -1,17 +1,17 @@
-import { axiosInstance } from "@/lib/request";
+import { axiosInstance, handleResponse } from "@/lib/request";
 import type { Response } from "@/types/response";
 import type { Integration } from "@/types/integration";
 
 class IntegrationService {
     fetchIntegration = async (): Promise<Response<Integration>> => {
-        return await axiosInstance.get<Response<Integration>>("v1/integration").then(res => res.data);
+        return handleResponse(axiosInstance.get<Response<Integration>>("v1/integration"));
     }
 
     submitIntegration = async (data: Integration): Promise<Response<Integration>> => {
-        return await axiosInstance.put<Response<Integration>>("v1/integration", data).then(res => res.data);
+        return await handleResponse(axiosInstance.put<Response<Integration>>("v1/integration", data));
     }
 
-    sendOwntracksCommand = async (action: string): Promise<void> => axiosInstance.post(`v1/integration/owntracks/cmd/${action}`);
+    sendOwntracksCommand = async (action: string): Promise<void> => handleResponse(axiosInstance.post(`v1/integration/owntracks/cmd/${action}`));
 }
 
 export const integrationService: IntegrationService = new IntegrationService();

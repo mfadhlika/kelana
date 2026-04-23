@@ -1,4 +1,4 @@
-import { axiosInstance } from "@/lib/request";
+import { axiosInstance, handleResponse } from "@/lib/request";
 import { stompClient } from "@/lib/websocket";
 import type { PointProperties } from "@/types/properties";
 import type { LocationQuery } from "@/types/requests/location";
@@ -20,14 +20,12 @@ class LocationService {
         if (query.limit) params.set('limit', query.limit.toString());
         if (query.offset) params.set('offset', query.offset.toString());
 
-        return await axiosInstance
-            .get<Response<FeatureCollection<Point, PointProperties>>>(`v1/locations?${params.toString()}`)
-            .then(res => res.data);
+        return await handleResponse(axiosInstance
+            .get<Response<FeatureCollection<Point, PointProperties>>>(`v1/locations?${params.toString()}`));
     }
 
     fetchLastLocation = async (): Promise<Response<Feature<Point, PointProperties>>> => {
-        return axiosInstance.get<Response<Feature<Point, PointProperties>>>('v1/locations/last')
-            .then(res => res.data);
+        return handleResponse(axiosInstance.get<Response<Feature<Point, PointProperties>>>('v1/locations/last'));
     }
 
     subscribeLastLocation = (username: string, callback: (feature: Feature<Point, PointProperties>) => void) => {
@@ -51,8 +49,7 @@ class LocationService {
     }
 
     reverseGeocode = async (): Promise<Response> => {
-        return await axiosInstance.post<Response>('v1/locations/reverse')
-            .then(res => res.data);
+        return await handleResponse(axiosInstance.post<Response>('v1/locations/reverse'));
     }
 }
 

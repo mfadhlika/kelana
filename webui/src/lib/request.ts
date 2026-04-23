@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
 import { toast } from "sonner";
 import type { Login } from "@/types/responses/login";
 import type { Response } from "@/types/response";
@@ -89,4 +89,16 @@ axiosInstance.interceptors.response.use(
     }
 );
 
-export { axiosInstance };
+const handleResponse = async <T>(promis: Promise<AxiosResponse<T>>): Promise<T> => {
+    try {
+        const res = await promis;
+        return res.data;
+    } catch (err) {
+        if (axios.isAxiosError(err)) {
+            throw err.response?.data
+        }
+        throw err;
+    }
+}
+
+export { axiosInstance, handleResponse };
