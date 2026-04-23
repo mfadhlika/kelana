@@ -3,16 +3,15 @@ import { useNavigate } from "react-router";
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Card, CardContent } from "@/components/ui/card";
-import type { Response } from "@/types/response";
 import { Controller, useForm } from "react-hook-form";
 import type { Login as LoginRequest } from "@/types/requests/login";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { AxiosError } from "axios";
 import { loginFormSchema } from "@/types/schema/login";
 import { authService } from "@/services/auth-service";
 import { useAuthStore } from "@/hooks/use-auth";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { toast } from "sonner";
+import { Loader2Icon } from "lucide-react";
 
 export default function LoginPage() {
     const { userInfo, login } = useAuthStore();
@@ -23,14 +22,16 @@ export default function LoginPage() {
         defaultValues: {}
     });
 
-    const onSubmit = (values: LoginRequest) => {
-        authService.login(values).then(({ data }) => {
-            login(data.accessToken);
-            navigate("/");
-        })
-            .catch((err: AxiosError<Response>) => {
-                toast.error(err.response?.data?.message);
+    const onSubmit = async (values: LoginRequest): Promise<void> => {
+        try {
+            await authService.login(values).then(({ data }) => {
+                login(data.accessToken);
+                navigate("/");
             });
+        } catch (err) {
+            toast.error(`Failed to login: ${(err as { response: { data: { message: string } } }).response?.data?.message}`);
+            throw err;
+        }
     }
 
     useEffect(() => {
@@ -61,7 +62,10 @@ export default function LoginPage() {
                                             <Input id={`form-login-${field.name}`} type="password" autoComplete="password"  {...field} />
                                         </Field>
                                     )} />
-                                    <Button type="submit" className="w-full">Login</Button>
+                                    <Button type="submit" className="w-full">
+                                        {loginForm.formState.isSubmitting && <Loader2Icon className="animate-spin" />}
+                                        Login
+                                    </Button>
                                 </FieldGroup>
                             </form>
                         </CardContent>
