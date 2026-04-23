@@ -60,19 +60,19 @@ export const NewTripDialog = ({ className, onClose, trip, children }: NewTripDia
             });
     }, [open, startAt, endAt]);
 
-    const onSubmit = (values: Trip) => {
-        tripService.createTrip({
-            uuid: uuidv4(),
-            ...values
-        })
-            .then(_ => {
-                toast.success("Trip saved successfully");
-                setOpen(false);
-                if (onClose) onClose();
-            })
-            .catch(err => {
-                toast.error(`Failed to save trip`, err);
+    const onSubmit = async (values: Trip): Promise<void> => {
+        try {
+            await tripService.createTrip({
+                uuid: uuidv4(),
+                ...values
             });
+            toast.success("Trip saved successfully");
+            setOpen(false);
+            if (onClose) onClose();
+        } catch (err) {
+            toast.error(`Failed to save trip: ${err}`);
+            throw err;
+        }
     }
 
     return (
@@ -117,7 +117,7 @@ export const NewTripDialog = ({ className, onClose, trip, children }: NewTripDia
                             )} />
                         <Controller control={form.control} name="isPublic"
                             render={({ field }) => (
-                                <Field className="flex flex-row items-center gap-2">
+                                <Field orientation="horizontal">
                                     <Checkbox
                                         checked={field.value}
                                         onCheckedChange={field.onChange}
