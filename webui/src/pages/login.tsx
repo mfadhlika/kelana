@@ -29,8 +29,7 @@ export default function LoginPage() {
                 navigate("/");
             });
         } catch (err) {
-            toast.error(`Failed to login: ${(err as { response: { data: { message: string } } }).response?.data?.message}`);
-            throw err;
+            toast.error(`Failed to login: ${(err as { message: string }).message}`);
         }
     }
 

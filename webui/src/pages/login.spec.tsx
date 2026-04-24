@@ -66,11 +66,7 @@ describe('login page', async () => {
 
         it('should show error message if login failed', async () => {
             mocks.login.mockRejectedValue({
-                response: {
-                    data: {
-                        message: 'invalid username/password'
-                    }
-                }
+                message: 'invalid username/password'
             });
 
             await loginPage.getByLabelText("Username").fill("test");
