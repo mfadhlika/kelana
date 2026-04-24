@@ -71,7 +71,6 @@ export const NewTripDialog = ({ className, onClose, trip, children }: NewTripDia
             if (onClose) onClose();
         } catch (err) {
             toast.error(`Failed to save trip: ${err}`);
-            throw err;
         }
     }
 
