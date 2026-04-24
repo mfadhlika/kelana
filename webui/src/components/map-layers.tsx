@@ -17,7 +17,7 @@ import { DrawControl } from "./draw-control";
 export type MarkersProps = React.ComponentProps<"div"> & {
     locations: FeatureCollection<Point, PointProperties>,
     lastKnowLocation?: Feature<Point, PointProperties>,
-    regions?: FeatureCollection<LineString, RegionProperties>,
+    regions: FeatureCollection<LineString, RegionProperties>,
     zoom?: number,
     showPoints?: Checked,
     showLines?: Checked,
@@ -297,7 +297,7 @@ export function MapLayers({
                 <MarkerPopup {...lastKnowLocation.properties} />
                 <Tooltip>{formatDistanceToNow(new Date(lastKnowLocation.properties.timestamp))} ago</Tooltip>
             </Marker>}
-        {showRegions && regions && <FeatureGroup>
+        {showRegions && <FeatureGroup>
             {regions.features.map(feature => {
                 const positions = turf.getCoords(turf.flip(feature));
                 return <Polygon key={feature.properties?.desc} positions={positions}>

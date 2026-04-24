@@ -17,6 +17,8 @@ import { Input } from "./ui/input";
 import * as turf from "@turf/turf";
 import type { RegionProperties } from "@/types/properties";
 import { regionService } from "@/services/region-service";
+import { toast } from "sonner";
+import { useRegionsStore } from "@/hooks/use-regions-store";
 
 const RegionEditPopup = ({ region, onCancel, onSubmit }: { region?: Region, onCancel: () => void, onSubmit: (region: Region) => Promise<void> }) => {
     const form = useForm<Region>({
@@ -76,6 +78,7 @@ export const DrawControl = () => {
     const drawState = useDrawState();
     const activeMarkerRef = useRef<L.Layer>(null);
     const context = useLeafletContext();
+    const fetchRegions = useRegionsStore((state) => state.fetch);
 
     const mapClickCallback = useCallback((e: L.LeafletMouseEvent) => {
         switch (drawState) {
@@ -150,9 +153,8 @@ export const DrawControl = () => {
                 const root = createRoot(div);
                 root.render(<RegionEditPopup
                     onCancel={() => {
-                        activeMarkerRef.current?.closePopup();
+                        root.unmount();
                         setDrawState("draw:end");
-                        context.layerContainer?.removeLayer(activeMarkerRef.current!);
                     }}
                     onSubmit={async (region: RegionProperties) => {
                         const props = {
@@ -183,21 +185,32 @@ export const DrawControl = () => {
                         }
 
                         const payload = turf.featureCollection([feature]);
-                        const res = await regionService.createRegions(payload).then(() => activeMarkerRef.current?.closePopup());
-                        console.debug(res);
+                        try {
+                            await regionService.createRegions(payload);
+                        } catch (err) {
+                            toast.error(`Failed to create regions: ${(err as { message: string }).message}`);
+                        } finally {
+                            root.unmount();
+                            setDrawState("draw:end");
+                        }
                     }} />);
                 activeMarkerRef.current?.bindPopup(div, { autoClose: false, closeOnClick: false, closeButton: false, closeOnEscapeKey: false }).openPopup();
                 context.map.getContainer().classList.remove("cursor-crosshair!");
                 break;
             }
             case "draw:end": {
-                activeMarkerRef.current = null;
+                if (activeMarkerRef.current) {
+                    activeMarkerRef.current.closePopup();
+                    context.layerContainer?.removeLayer(activeMarkerRef.current);
+                    activeMarkerRef.current = null;
+                    fetchRegions();
+                }
                 setDrawState("view");
                 break;
             }
 
         }
-    }, [context.layerContainer, context.map, drawState]);
+    }, [context.layerContainer, context.map, drawState, fetchRegions]);
 
     const buttons = [
         [
