@@ -4,6 +4,7 @@ import { PreviewMaps } from "@/components/preview-maps";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { handleError } from "@/lib/utils/error-handler";
 import { tripService } from "@/services/trip-service";
 import type { TripProperties } from "@/types/properties";
 import type { FeatureCollection, MultiLineString } from "geojson";
@@ -19,17 +20,13 @@ export default function TripsPage() {
     useEffect(() => {
         tripService.fetchTrips()
             .then(res => setTrips(res.data))
-            .catch(err => toast.error("faled to fetch trips", err));
+            .catch(err => handleError(err, "Failed to fetch trips"));
     }, [count]);
 
     const handleDelete = (id: number) => {
         tripService.deleteTrip(id)
-            .then(() => {
-                setCount((count) => count + 1);
-            })
-            .catch(err => {
-                toast.error("faled to delete trip", err);
-            });
+            .then(() => setCount((count) => count + 1))
+            .catch(err => handleError(err, "Failed to delete trip"));
     };
 
     return (

@@ -3,10 +3,10 @@ import type { Feature, Point } from "geojson";
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import { useParams } from "react-router";
-import { toast } from "sonner";
 import * as turf from "@turf/turf";
 import type { LatLngBoundsExpression, LatLngTuple } from "leaflet";
 import { tripService } from "@/services/trip-service";
+import { handleError } from "@/lib/utils/error-handler";
 
 export default function TripPage() {
     const { uuid } = useParams();
@@ -17,10 +17,8 @@ export default function TripPage() {
     useEffect(() => {
         if (!uuid) return;
         tripService.fetchTrip(uuid)
-            .then(({ data }) => {
-                setLocations(data);
-            })
-            .catch(err => toast.error(`Failed to get user's locations: ${err}`));
+            .then(({ data }) => setLocations(data))
+            .catch(err => handleError(err, "Failed to get user's locations"));
     }, [uuid]);
 
     useEffect(() => {

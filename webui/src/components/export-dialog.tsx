@@ -22,6 +22,7 @@ import type { Export as ExportRequest } from "@/types/requests/export";
 import { exportFormSchema } from "@/types/schema/export";
 import { exportService } from "@/services/export-service";
 import { Field, FieldError, FieldLabel } from "./ui/field";
+import { handleError } from "@/lib/utils/error-handler";
 
 
 
@@ -61,9 +62,7 @@ export const ExportDialog = ({ className }: React.ComponentProps<"div">) => {
                 toast.success(data.message)
                 setOpen(false);
             })
-            .catch(err => {
-                toast.error(`Failed to export`, err);
-            });
+            .catch(err => handleError(err, "Failed to export"));
     }
 
     return (

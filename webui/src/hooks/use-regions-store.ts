@@ -19,10 +19,12 @@ const useRegionsStore = create<RegionStore>((set) => ({
         set({ isLoading: true });
         try {
             const res = await regionService.fetchRegions();
-            set({ data: res.data, isLoading: false, error: undefined });
+            set({ data: res.data });
         } catch (err) {
-            set({ isLoading: false, error: (err as { response: { data: { message: string } } }).response.data })
+            set({ error: (err as { message: string }) })
             throw err;
+        } finally {
+            set({ isLoading: false });
         }
     }
 }));

@@ -9,15 +9,15 @@ import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import type { Import } from "@/types/import";
 import { importService } from "@/services/import-service";
+import { handleError } from "@/lib/utils/error-handler";
 
 export default function ImportPage() {
     const [data, setData] = useState<Import[]>([]);
 
     useEffect(() => {
         importService.fetchImports()
-            .then(({ data }) => {
-                setData(data);
-            }).catch(err => toast.error(`Failed to get user's import data: ${err}`));
+            .then(({ data }) => setData(data))
+            .catch(err => handleError(err, "Failed to get user's import data"));
     }, []);
 
 

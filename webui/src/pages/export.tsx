@@ -9,15 +9,15 @@ import { toast } from "sonner";
 import type { Export } from "@/types/export";
 import { ExportDialog } from "@/components/export-dialog";
 import { exportService } from "@/services/export-service";
+import { handleError } from "@/lib/utils/error-handler";
 
 export default function ExportPage() {
     const [data, setData] = useState<Export[]>([]);
 
     useEffect(() => {
         exportService.fetchExports()
-            .then(data => {
-                setData(data.data);
-            }).catch(err => toast.error(`Failed to get user's export data: ${err}`));
+            .then(data => setData(data.data)
+            ).catch(err => handleError(err, "Failed to get user's export data"));
     }, []);
 
 

@@ -16,6 +16,7 @@ import { useAuthStore } from "@/hooks/use-auth";
 import { backupService } from "@/services/backup-service";
 import { integrationService } from "@/services/integration-service";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { handleError } from "@/lib/utils/error-handler";
 
 const accountFormSchema = z.object({
     username: z.string(),
@@ -55,14 +56,12 @@ function AccountSettingsTab() {
             password: values.password,
         })
             .then((_res) => {
-                if (values.username !== userInfo?.username) {
-                    logout();
-                    navigate("/login");
-                }
+                if (values.username === userInfo?.username) return;
+
+                logout();
+                navigate("/login");
             })
-            .catch(err => {
-                toast.error(`Failed to updated user's account: ${err}`);
-            });
+            .catch(err => handleError(err, "Failed to updated user's account"));
     }
 
     return (
@@ -187,10 +186,7 @@ function IntegrationSettingsTab() {
     useEffect(() => {
         integrationService.fetchIntegration().then(res => {
             setIntegration({ ...res.data });
-        }).catch(err => {
-            console.error(err);
-            toast.error("failed fetch integration settings", err);
-        });
+        }).catch(err => handleError(err, "failed fetch integration settings"));
     }, []);
 
     const doSubmit = (data: Integration) => {
@@ -199,9 +195,7 @@ function IntegrationSettingsTab() {
                 setIntegration({ ...res.data });
                 toast.success("Integration saved succesfully");
             })
-            .catch(err => {
-                toast.error(`Failed to update integration: ${err}`);
-            });
+            .catch(err => handleError(err, "Failed to update integration"));
     }
 
     return (
@@ -236,9 +230,7 @@ function BackupSettingsTab() {
     const createBackup = () => {
         backupService.createBackup().then(() => {
             toast.info("Backup successfully created");
-        }).catch(() => {
-            toast.error("Failed to create backup");
-        })
+        }).catch(() => handleError("Failed to create backup"));
     };
 
     return (

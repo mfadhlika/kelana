@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { deviceService } from "@/services/device-service";
-import { toast } from "sonner";
+import { handleError } from "@/lib/utils/error-handler";
 
 export interface DeviceSelectProps {
     className?: string,
@@ -17,9 +17,7 @@ export const DeviceSelect = ({ className, selectedDevice, onSelectedDevice }: De
     useEffect(() => {
         deviceService.fetchDevices()
             .then(res => setDevices(res.data))
-            .catch(err => {
-                toast.error("faled to fetch trips", err);
-            });
+            .catch(err => handleError(err, "failed to fetch trips"));
     }, []);
 
     return (

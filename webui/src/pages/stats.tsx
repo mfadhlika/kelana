@@ -1,6 +1,7 @@
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { handleError } from "@/lib/utils/error-handler";
 import { locationService } from "@/services/location-service";
 import { statsService } from "@/services/stats-service";
 import { type Stats } from "@/types/stats";
@@ -19,19 +20,14 @@ export default function StatsPage() {
 
     useEffect(() => {
         statsService.fetchStats()
-            .then(res => setStats(res.data)).catch(err => {
-                toast.error("failed to fetch stats", err);
-            });
+            .then(res => setStats(res.data))
+            .catch(err => handleError(err, "failed to fetch stats"));
     }, []);
 
     const handleStartJob = () => {
         locationService.reverseGeocode()
-            .then(data => {
-                toast.info(data.message);
-            })
-            .catch(err => {
-                toast.error("failed to start reverse geocode job", err);
-            });
+            .then(data => toast.info(data.message))
+            .catch(err => handleError(err, "failed to start reverse geocode job"));
     };
 
     return (

@@ -19,6 +19,7 @@ import type { Import as ImportRequest } from "@/types/requests/import";
 import { importFormSchema } from "@/types/schema/import";
 import { importService } from "@/services/import-service";
 import { Field, FieldContent, FieldLabel, FieldLegend, FieldSet } from "./ui/field";
+import { handleError } from "@/lib/utils/error-handler";
 
 
 
@@ -42,9 +43,7 @@ export const ImportDialog = ({ className }: React.ComponentProps<"div">) => {
                 toast.success("File uploaded succesfully");
                 setOpen(false);
             })
-            .catch(err => {
-                toast.error(`Failed to get user's devices: ${err}`);
-            });
+            .catch(err => handleError(err, "Failed to get user's device"));
     }
 
     return (

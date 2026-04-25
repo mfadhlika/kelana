@@ -6,12 +6,12 @@ import { DatePicker } from "@/components/date-picker";
 import { DeviceSelect } from "@/components/device-select";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/header";
-import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
 import type { Location } from "@/types/location";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { PreviewMaps } from "@/components/preview-maps";
 import { locationService } from "@/services/location-service";
+import { handleError } from "@/lib/utils/error-handler";
 
 export default function DataPage() {
     const [data, setData] = useState<Location[]>([]);
@@ -30,9 +30,10 @@ export default function DataPage() {
                         ...feature.properties,
                         coordinates: feature.geometry,
                     } as Location;
-                })
+                });
+
                 setData(newData);
-            }).catch(err => toast.error(`Failed to get user's location data: ${err}`));
+            }).catch(err => handleError(err, "Failed to get user's location data"));
     }, [date, device, limit, offset]);
 
     const columns: ColumnDef<Location>[] = [

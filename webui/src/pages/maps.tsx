@@ -5,7 +5,6 @@ import { DatePicker } from "@/components/date-picker.tsx";
 import { DeviceSelect } from "@/components/device-select.tsx";
 import { MapLayers } from "@/components/map-layers";
 import type { Feature, FeatureCollection, Point } from "geojson";
-import { toast } from "sonner";
 import { useLocationFilter } from "@/hooks/use-location-filter";
 import { LayerCheckbox } from "@/components/layer-checkbox";
 import * as turf from "@turf/turf";
@@ -22,6 +21,7 @@ import { locationService } from '@/services/location-service';
 import { useAuthStore } from '@/hooks/use-auth';
 import { useLayerState } from '@/hooks/use-layer-state';
 import { useRegionsStore } from '@/hooks/use-regions-store';
+import { handleError } from '@/lib/utils/error-handler';
 
 export default function MapsPage() {
     const { userInfo } = useAuthStore();
@@ -36,8 +36,7 @@ export default function MapsPage() {
     useEffect(() => {
         if (!layerSettings.showRegions) return;
 
-        fetchRegions()
-            .catch(err => toast.error(`failed to fetch regions: ${err.message}`));
+        fetchRegions().catch(err => handleError(err, "failed to fetch regions"));
     }, [fetchRegions, layerSettings.showRegions]);
 
     useEffect(() => {
@@ -53,10 +52,8 @@ export default function MapsPage() {
             device,
             bounds: bounded ? bounds : undefined
         })
-            .then(({ data }) => {
-                setLocations(data);
-            })
-            .catch(err => toast.error(`Failed to get user's locations: ${err}`));
+            .then(({ data }) => setLocations(data))
+            .catch(err => handleError(err, "Failed to get user's locations"));
     }, [date, device, bounded, bounds]);
 
     useEffect(() => {
@@ -64,10 +61,8 @@ export default function MapsPage() {
         else locationService.unsubscribeLastLocation();
 
         locationService.fetchLastLocation()
-            .then(({ data }) => {
-                setLastKnownLocation(data);
-            })
-            .catch(err => toast.error(`Failed to get user's lsat known locations: ${err}`));
+            .then(({ data }) => setLastKnownLocation(data))
+            .catch(err => handleError(err, "Failed to get user's lsat known locations"));
 
         try {
             locationService.subscribeLastLocation(userInfo!.username!, (data) => {
