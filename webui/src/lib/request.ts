@@ -5,9 +5,10 @@ import type { Response } from "@/types/response";
 import router from "./router";
 import { authService } from "@/services/auth-service";
 import { useAuthStore } from "@/hooks/use-auth";
+import { AuthenticationError } from "@/types/errors";
 
 let refreshTokenPromise: Promise<string> | null = null;
-let logoutPromise: Promise<void> | null = null;
+let logoutPromise: Promise<Response> | null = null;
 
 const axiosInstance = axios.create({
     baseURL: "/api",
@@ -17,19 +18,19 @@ const axiosInstance = axios.create({
     }
 });
 
-async function logout() {
+async function logout(): Promise<Response> {
     try {
-        await authService.logout();
+        const res = await authService.logout();
         useAuthStore.getState().logout();
 
         await router.navigate("/login", {
             replace: true
         });
+        return res;
     } catch (err) {
         console.error(err);
         toast.error(`logging out failed: ${err}`);
-    } finally {
-        logoutPromise = null;
+        throw err;
     }
 };
 
@@ -62,11 +63,7 @@ axiosInstance.interceptors.response.use(
 
             if (!refreshTokenPromise) {
                 console.debug("refreshing token");
-                refreshTokenPromise = refreshToken()
-                    .then((token) => {
-                        refreshTokenPromise = null;
-                        return token;
-                    });
+                refreshTokenPromise = refreshToken();
             }
 
             try {
@@ -81,7 +78,11 @@ axiosInstance.interceptors.response.use(
                     logoutPromise = logout();
 
                 console.error("failed refreshing token", err);
-                return logoutPromise;
+                const res = await logoutPromise;
+                return Promise.reject(new AuthenticationError(res.message));
+            } finally {
+                refreshTokenPromise = null;
+                logoutPromise = null;
             }
         }
 

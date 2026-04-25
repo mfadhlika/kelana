@@ -15,7 +15,7 @@ class AuthService {
         return await handleResponse(axiosInstance.get<Response>("v1/auth/validate"));
     }
 
-    logout = async (): Promise<void> => handleResponse(axiosInstance.delete("v1/logout"));
+    logout = async (): Promise<Response> => handleResponse(axiosInstance.delete("v1/logout"));
 }
 
 export const authService: AuthService = new AuthService();
