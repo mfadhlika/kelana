@@ -123,6 +123,8 @@ function OwntracksIntegrationItem({ integration, doSubmit }: { integration: Inte
 
     return (
         <>
+            <h4 className="font-semibold tracking-tight">HTTP Endpoint Credentials</h4>
+            <p>Configure username and password for http endpoint.</p>
             <form onSubmit={owntracksForm.handleSubmit(onSubmit)} className="flex flex-col gap-4">
                 <FieldGroup>
                     <Controller control={owntracksForm.control} name="username" render={({ field }) => (
@@ -140,7 +142,8 @@ function OwntracksIntegrationItem({ integration, doSubmit }: { integration: Inte
                     <Button type="submit" className="w-[100px] self-end" disabled={owntracksForm.formState.isSubmitting}>Save</Button>
                 </FieldGroup>
             </form>
-            <div style={{ "width": "100%", "display": "flex", "justifyContent": "space-between", "marginTop": "2.5rem" }}>
+            <h4 className="font-semibold tracking-tight">MQTT Commands</h4>
+            <div className="w-full flex justify-between">
                 <span>Publish waypoints</span>
                 <Button onClick={() => integrationService.sendOwntracksCommand("setWaypoints")}>Publish waypoints</Button>
             </div>
@@ -199,30 +202,38 @@ function IntegrationSettingsTab() {
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Integration</CardTitle>
-                <CardDescription>
-                    Configure integration with other apps here.
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-6">
-                <Accordion key={JSON.stringify(integration)} type="multiple">
-                    <AccordionItem value="owntracks">
-                        <AccordionTrigger>Owntracks</AccordionTrigger>
-                        <AccordionContent>
-                            <OwntracksIntegrationItem integration={integration} doSubmit={doSubmit} />
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="overland">
-                        <AccordionTrigger>Overland</AccordionTrigger>
-                        <AccordionContent>
-                            <OverlandIntegrationItem integration={integration} doSubmit={doSubmit} />
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
-            </CardContent>
-        </Card>
+        <Tabs defaultValue="owntracks">
+            <TabsList>
+                <TabsTrigger value="owntracks">Owntracks</TabsTrigger>
+                <TabsTrigger value="overland">Overland</TabsTrigger>
+            </TabsList>
+            <TabsContent value="owntracks">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Owntracks Integration</CardTitle>
+                        <CardDescription>
+                            Configure integration with owntracks.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-6">
+                        <OwntracksIntegrationItem integration={integration} doSubmit={doSubmit} />
+                    </CardContent>
+                </Card>
+            </TabsContent>
+            <TabsContent value="overland">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Overland Integration</CardTitle>
+                        <CardDescription>
+                            Configure integration with overland.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-6">
+                        <OverlandIntegrationItem integration={integration} doSubmit={doSubmit} />
+                    </CardContent>
+                </Card>
+            </TabsContent>
+        </Tabs>
     );
 }
 
