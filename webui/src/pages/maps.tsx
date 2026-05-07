@@ -22,6 +22,7 @@ import { useAuthStore } from '@/hooks/use-auth';
 import { useLayerState } from '@/hooks/use-layer-state';
 import { useRegionsStore } from '@/hooks/use-regions-store';
 import { handleError } from '@/lib/utils/error-handler';
+import 'leaflet-smooth-zoom';
 
 export default function MapsPage() {
     const { userInfo } = useAuthStore();
@@ -109,9 +110,12 @@ export default function MapsPage() {
                 className="size-full"
                 center={[-6.175, 106.8275]}
                 zoom={13}
-                scrollWheelZoom={true}
                 zoomControl={false}
                 bounds={bounds}
+                scrollWheelZoom={false}
+                smoothWheelZoom={true}
+                smoothSensitivity={10}
+                inertia={false}
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
