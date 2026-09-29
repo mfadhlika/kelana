@@ -9,9 +9,12 @@ import { Header } from "@/components/header";
 import { useLocationFilter } from "@/hooks/use-location-filter";
 import type { Location } from "@/types/location";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Map } from "lucide-react";
 import { PreviewMaps } from "@/components/preview-maps";
 import { locationService } from "@/services/location-service";
+import { exportService } from "@/services/export-service";
 import { handleError } from "@/lib/utils/error-handler";
+import { toast } from "sonner";
 
 export default function DataPage() {
     const [data, setData] = useState<Location[]>([]);
@@ -99,6 +102,22 @@ export default function DataPage() {
         }
     ];
 
+    const onExport = () => {
+        if (!date?.from || !date?.to) {
+            toast.error("Export require start and end date");
+            return
+        }
+
+        exportService.createExport({
+            startAt: date?.from,
+            endAt: date?.to
+        })
+            .then((data) => {
+                toast.success(data.message)
+            })
+            .catch(err => handleError(err, "Failed to export"));
+    }
+
     return (
         <>
             <Header>
@@ -107,6 +126,10 @@ export default function DataPage() {
                     date,
                 })} />
                 <DeviceSelect className="shadow-xs border-solid" selectedDevice={device} onSelectedDevice={(device) => setFilter({ ...filter, device })} />
+                <Button variant="outline" className="shadow-xs" onClick={onExport}>
+                    <Map />
+                    Export
+                </Button>
             </Header>
             <div className="flex flex-1 flex-col">
                 <div className="@container/main flex flex-1 flex-col gap-4 p-4">

@@ -7,7 +7,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import type { Export } from "@/types/export";
-import { ExportDialog } from "@/components/export-dialog";
 import { exportService } from "@/services/export-service";
 import { handleError } from "@/lib/utils/error-handler";
 
@@ -92,7 +91,6 @@ export default function ExportPage() {
     return (
         <>
             <Header>
-                <ExportDialog />
             </Header>
             <div className="flex flex-1 flex-col">
                 <div className="@container/main flex flex-1 flex-col gap-4 p-4">
