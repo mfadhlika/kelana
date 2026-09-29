@@ -16,8 +16,8 @@ import { exportService } from "@/services/export-service";
 import { handleError } from "@/lib/utils/error-handler";
 import { toast } from "sonner";
 
-export default function DataPage() {
-    const [data, setData] = useState<Location[]>([]);
+export default function PointsPage() {
+    const [points, setPoints] = useState<Location[]>([]);
     const [filter, setFilter] = useLocationFilter();
 
     const date = filter.date;
@@ -35,7 +35,7 @@ export default function DataPage() {
                     } as Location;
                 });
 
-                setData(newData);
+                setPoints(newData);
             }).catch(err => handleError(err, "Failed to get user's location data"));
     }, [date, device, limit, offset]);
 
@@ -133,7 +133,7 @@ export default function DataPage() {
             </Header>
             <div className="flex flex-1 flex-col">
                 <div className="@container/main flex flex-1 flex-col gap-4 p-4">
-                    <DataTable columns={columns} data={data} />
+                    <DataTable columns={columns} data={points} />
                     <div className="flex items-center justify-end space-x-2 py-4">
                         <Button
                             variant="outline"

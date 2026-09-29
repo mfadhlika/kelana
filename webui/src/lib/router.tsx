@@ -1,7 +1,7 @@
 import MapsPage from "@/pages/maps";
 import { ProtectedRoute } from "@/components/protected-route";
 import { createBrowserRouter } from "react-router"
-import DataPage from "@/pages/data";
+import PointsPage from "@/pages/points";
 import SettingsPage from "@/pages/settings";
 import LoginPage from "@/pages/login";
 import TripsPage from "@/pages/trips";
@@ -32,8 +32,8 @@ const router = createBrowserRouter([
                 element: <TripsPage />
             },
             {
-                path: "/data",
-                element: <DataPage />
+                path: "/points",
+                element: <PointsPage />
             },
             {
                 path: "/import",

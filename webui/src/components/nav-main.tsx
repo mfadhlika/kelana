@@ -20,7 +20,7 @@ export function NavMain({
 }: {
     items: {
         title: string
-        url: string
+        url?: string
         icon: LucideIcon
         items?: {
             title: string
@@ -42,12 +42,14 @@ export function NavMain({
                                     children: item.title,
                                     hidden: false,
                                 }}
-                                isActive={location.pathname == item.url}
                                 className="px-2.5 md:px-2">
-                                <Link to={item.url}>
+                                {item.url ? <Link to={item.url}>
                                     <item.icon />
                                     {item.title}
-                                </Link>
+                                </Link> : <div>
+                                    <item.icon />
+                                    {item.title}
+                                </div>}
                             </SidebarMenuButton>
                             {item.items?.length ? (
                                 <>
@@ -61,7 +63,9 @@ export function NavMain({
                                         <SidebarMenuSub>
                                             {item.items.map((subItem) => (
                                                 <SidebarMenuItem key={subItem.title}>
-                                                    <SidebarMenuSubButton asChild>
+                                                    <SidebarMenuSubButton
+                                                        asChild
+                                                        isActive={location.pathname == item.url}>
                                                         <Link to={subItem.url}>
                                                             <subItem.icon />
                                                             {subItem.title}
