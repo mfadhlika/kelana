@@ -79,6 +79,7 @@ public class OwntracksMqttConfig {
     }
 
     @MessagingGateway(defaultRequestChannel = "mqttOutboundChannel")
+    @ConditionalOnProperty(value = "mqtt.enable", havingValue = "true")
     public interface MqttGateway {
         void publish(@Header(MqttHeaders.TOPIC) String topic, String payload) throws MqttException;
     }
