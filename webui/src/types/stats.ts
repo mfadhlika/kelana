@@ -3,5 +3,7 @@ export type Stats = {
     totalReverseGeocodedPoints: number,
     totalCitiesVisited: number,
     totalCountriesVisited: number,
-    lastPointTimestamp?: string
+    lastPointTimestamp?: string,
+    cities: string[],
+    countries: string[]
 }

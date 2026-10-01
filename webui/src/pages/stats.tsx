@@ -15,7 +15,9 @@ export default function StatsPage() {
         totalReverseGeocodedPoints: 0,
         totalCitiesVisited: 0,
         totalCountriesVisited: 0,
-        lastPointTimestamp: undefined
+        lastPointTimestamp: undefined,
+        cities: [],
+        countries: []
     });
 
     useEffect(() => {
