@@ -4,11 +4,11 @@ services:
     ports:
       - '1883:1883'
     volumes:
-      - '.docker/mosquitto:/mosquitto/config'
+      - './.docker/mosquitto:/mosquitto/config'
   postgis:
     image: 'postgis/postgis'
     ports:
-      - '50051:5432'
+      - '5432:5432'
     environment:
       - POSTGRES_USER=kelana
       - POSTGRES_PASSWORD=kelana
