@@ -97,7 +97,7 @@ public class ReverseGeocodeServiceTest {
             }
         }));
 
-        doNothing().when(locationRepository).updateLocationGeocode(eq(1),
+        doNothing().when(locationRepository).updateGeocode(eq(1),
                 any(FeatureCollection.class));
 
         doNothing().when(placeRepository).createPlace(any(Place.class));

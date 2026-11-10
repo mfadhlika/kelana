@@ -80,6 +80,7 @@ public class Location {
     private String rawData;
     private ZonedDateTime createdAt;
     private FeatureCollection geocode;
+    private Integer placeId;
 
     public Location(Geometry point) {
         this.geometry = point;
@@ -292,5 +293,13 @@ public class Location {
 
     public void setGeocode(FeatureCollection featureCollection) {
         this.geocode = featureCollection;
+    }
+
+    public Integer getPlaceId() {
+        return placeId;
+    }
+
+    public void setPlaceId(Integer value) {
+        this.placeId = value;
     }
 }

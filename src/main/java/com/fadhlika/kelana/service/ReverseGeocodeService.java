@@ -71,13 +71,13 @@ public class ReverseGeocodeService {
                 try {
                     FeatureCollection geocode = photonRepository.reverseGeocode(coord.y, coord.x, 3);
 
-                    locationRepository.updateLocationGeocode(l.getId(), geocode);
+                    for (int j = 0; j < geocode.features().size(); j++) {
+                        Feature feature = geocode.features().get(j);
 
-                    for (Feature feature : geocode.features()) {
                         GeocodeProperties props = feature.convertProperties(new TypeReference<GeocodeProperties>() {
                         });
 
-                        placeRepository.createPlace(new Place(
+                        Place place = placeRepository.createPlace(new Place(
                                 "photon",
                                 feature.getGeometry(),
                                 props.type(),
@@ -95,8 +95,11 @@ public class ReverseGeocodeService {
                                         add(feature);
                                     }
                                 })));
-                    }
 
+                        if (j == 0) {
+                            locationRepository.updatePlace(l.getId(), place.id());
+                        }
+                    }
                 } catch (Exception ex) {
                     logger.error("error: {}, skipping...", ex.getMessage());
                 }
