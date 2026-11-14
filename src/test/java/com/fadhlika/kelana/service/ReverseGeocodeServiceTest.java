@@ -3,22 +3,10 @@ package com.fadhlika.kelana.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Optional;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import com.fadhlika.kelana.dto.Feature;
 import com.fadhlika.kelana.dto.FeatureCollection;
@@ -28,6 +16,17 @@ import com.fadhlika.kelana.model.Place;
 import com.fadhlika.kelana.repository.LocationRepository;
 import com.fadhlika.kelana.repository.PhotonRepository;
 import com.fadhlika.kelana.repository.PlaceRepository;
+import java.io.IOException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.PlatformTransactionManager;
 import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,7 +51,8 @@ public class ReverseGeocodeServiceTest {
     private ObjectMapper mapper;
 
     @Test
-    public void testReverseGeocodeLocation() throws IOException, InterruptedException {
+    public void testReverseGeocodeLocation()
+        throws IOException, InterruptedException {
         Location l = new Location(-6.1754, 106.8272) {
             {
                 setId(1);
@@ -61,57 +61,98 @@ public class ReverseGeocodeServiceTest {
             }
         };
 
-        when(locationRepository.findLocation(Optional.empty(), Optional.empty(),
-                Optional.empty(), Optional.empty(),
-                Optional.empty(), Optional.empty(), Optional.of(false)))
-                .thenReturn(Optional.of(l))
-                .thenReturn(Optional.empty());
+        when(
+            locationRepository.findLocation(
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.of(false)
+            )
+        )
+            .thenReturn(Optional.of(l))
+            .thenReturn(Optional.empty());
 
-        when(photonRepository.reverseGeocode(-6.1754, 106.8272, 3)).thenReturn(new FeatureCollection(new ArrayList<>() {
-            {
-                add(new Feature(l.getGeometry(), new GeocodeProperties(
-                        "W",
-                        1159084257,
-                        "historic",
-                        "monument",
-                        "house",
-                        "10110",
-                        "ID",
-                        "Monumen Nasional",
-                        "Indonesia",
-                        "Jakarta",
-                        "Gambir",
-                        "RW 02",
-                        "Jalan Medan Merdeka Utara",
-                        "Jawa",
-                        "",
-                        "",
-                        new ArrayList<>() {
-                            {
-                                add(106.8267455);
-                                add(-6.1749898);
-                                add(106.8275888);
-                                add(-6.1758248);
-                            }
-                        })));
-            }
-        }));
+        when(photonRepository.reverseGeocode(-6.1754, 106.8272, 3)).thenReturn(
+            new FeatureCollection(
+                new ArrayList<>() {
+                    {
+                        add(
+                            new Feature(
+                                l.getGeometry(),
+                                new GeocodeProperties(
+                                    "W",
+                                    1159084257,
+                                    "historic",
+                                    "monument",
+                                    "house",
+                                    "10110",
+                                    "ID",
+                                    "Monumen Nasional",
+                                    "Indonesia",
+                                    "Jakarta",
+                                    "Gambir",
+                                    "RW 02",
+                                    "Jalan Medan Merdeka Utara",
+                                    "Jawa",
+                                    "",
+                                    "",
+                                    new ArrayList<>() {
+                                        {
+                                            add(106.8267455);
+                                            add(-6.1749898);
+                                            add(106.8275888);
+                                            add(-6.1758248);
+                                        }
+                                    }
+                                )
+                            )
+                        );
+                    }
+                }
+            )
+        );
 
-        doNothing().when(locationRepository).updateGeocode(eq(1),
-                any(FeatureCollection.class));
+        doNothing().when(locationRepository).updatePlace(eq(1), eq(1));
 
-        doNothing().when(placeRepository).createPlace(any(Place.class));
+        doReturn(
+            new Place(
+                1,
+                "photon",
+                l.getGeometry(),
+                "type",
+                "postcode",
+                "countryCode",
+                "name",
+                "country",
+                "city",
+                "district",
+                "locality",
+                "street",
+                "state",
+                null,
+                ZonedDateTime.now()
+            )
+        )
+            .when(placeRepository)
+            .createPlace(any(Place.class));
 
         reverseGeocodeService.processReverseGeocode();
 
         verify(photonRepository).reverseGeocode(-6.1754, 106.8272, 3);
 
-        verify(locationRepository, times(2)).findLocation(Optional.empty(),
-                Optional.empty(),
-                Optional.empty(), Optional.empty(),
-                Optional.empty(), Optional.empty(), Optional.of(false));
+        verify(locationRepository, times(2)).findLocation(
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(false)
+        );
 
         verify(placeRepository, times(1)).createPlace(any(Place.class));
-
     }
 }
