@@ -1,21 +1,5 @@
 package com.fadhlika.kelana.service;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Optional;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import com.fadhlika.kelana.dto.Feature;
 import com.fadhlika.kelana.dto.FeatureCollection;
 import com.fadhlika.kelana.dto.GeocodeProperties;
@@ -25,9 +9,27 @@ import com.fadhlika.kelana.repository.LocationRepository;
 import com.fadhlika.kelana.repository.PhotonRepository;
 import com.fadhlika.kelana.repository.PlaceRepository;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import org.locationtech.jts.geom.Coordinate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+
 @Service
 public class ReverseGeocodeService {
-    private static final Logger logger = LoggerFactory.getLogger(ReverseGeocodeService.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(
+        ReverseGeocodeService.class
+    );
 
     @Value("${reverse_geocode.batch_size}")
     private int batchSize;
@@ -38,8 +40,12 @@ public class ReverseGeocodeService {
 
     private final PlaceRepository placeRepository;
 
-    ReverseGeocodeService(LocationRepository locationRepository, PhotonRepository photonRepository,
-            PlaceRepository placeRepository, ObjectMapper mapper) {
+    ReverseGeocodeService(
+        LocationRepository locationRepository,
+        PhotonRepository photonRepository,
+        PlaceRepository placeRepository,
+        ObjectMapper mapper
+    ) {
         this.locationRepository = locationRepository;
         this.photonRepository = photonRepository;
         this.placeRepository = placeRepository;
@@ -53,52 +59,78 @@ public class ReverseGeocodeService {
     @Scheduled(cron = "0 0 0 * * *")
     public synchronized void processReverseGeocode() {
         try {
-
             logger.debug("start running reverse geocode job");
             Instant start = Instant.now();
 
             int i = 0;
             while (true) {
-                Optional<Location> location = locationRepository
-                        .findLocation(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-                                Optional.empty(), Optional.empty(), Optional.of(false));
+                Optional<Location> location = locationRepository.findLocation(
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    Optional.of(false)
+                );
 
-                if (location.isEmpty())
-                    break;
+                if (location.isEmpty()) break;
 
                 Location l = location.get();
                 Coordinate coord = l.getGeometry().getCoordinate();
                 try {
-                    FeatureCollection geocode = photonRepository.reverseGeocode(coord.y, coord.x, 3);
+                    List<Place> places = placeRepository.fetchPlaces(
+                        l.getGeometry().buffer(1)
+                    );
+                    Optional<Place> place = places.stream().findFirst();
 
-                    for (int j = 0; j < geocode.features().size(); j++) {
-                        Feature feature = geocode.features().get(j);
+                    if(places.isEmpty()) {
+                        FeatureCollection geocode =
+                            photonRepository.reverseGeocode(
+                                coord.y,
+                                coord.x,
+                                3
+                            );
 
-                        GeocodeProperties props = feature.convertProperties(new TypeReference<GeocodeProperties>() {
-                        });
+                        for (int j = 0; j < geocode.features().size(); j++) {
+                            Feature feature = geocode.features().get(j);
 
-                        Place place = placeRepository.createPlace(new Place(
-                                "photon",
-                                feature.getGeometry(),
-                                props.type(),
-                                props.postcode(),
-                                props.countrycode(),
-                                props.name(),
-                                props.country(),
-                                props.country(),
-                                props.district(),
-                                props.locality(),
-                                props.street(),
-                                props.state(),
-                                new FeatureCollection(new ArrayList<>() {
-                                    {
-                                        add(feature);
-                                    }
-                                })));
+                            GeocodeProperties props = feature.convertProperties(
+                                new TypeReference<GeocodeProperties>() {}
+                            );
 
-                        if (j == 0) {
-                            locationRepository.updatePlace(l.getId(), place.id());
+                            Place p = placeRepository.createPlace(
+                                new Place(
+                                    "photon",
+                                    feature.getGeometry(),
+                                    props.type(),
+                                    props.postcode(),
+                                    props.countrycode(),
+                                    props.name(),
+                                    props.country(),
+                                    props.country(),
+                                    props.district(),
+                                    props.locality(),
+                                    props.street(),
+                                    props.state(),
+                                    new FeatureCollection(
+                                        new ArrayList<>() {
+                                            {
+                                                add(feature);
+                                            }
+                                        }
+                                    )
+                                )
+                            );
+
+                            if (j == 0) {
+                                place = Optional.of(p);
+                            }
                         }
+                    }
+
+                    if(place.isPresent()) {
+                        locationRepository.updatePlace(l.getId(), place.get().id());
                     }
                 } catch (Exception ex) {
                     logger.error("error: {}, skipping...", ex.getMessage());

@@ -145,6 +145,8 @@ public class PlaceRepository {
             .optional();
     }
 
+
+
     public Optional<Place> fetchPlace(Long id) {
         return jdbcClient
             .sql(
@@ -229,5 +231,32 @@ public class PlaceRepository {
 
         String sql = sb.toString();
         return jdbcClient.sql(sql).params(args).query(rowMapper).list();
+    }
+
+    public List<Place> fetchPlaces(Geometry bounds) {
+        return jdbcClient
+            .sql(
+                """
+                SELECT
+                    id,
+                    provider,
+                    type,
+                    postcode,
+                    country_code,
+                    name,
+                    country,
+                    city,
+                    district,
+                    locality,
+                    street,
+                    state,
+                    ST_AsBinary(geometry) AS geometry,
+                    geodata,
+                    created_at
+                FROM place WHERE ST_CoveredBy(geometry, ST_GeomFromText(?))"""
+            )
+            .param(bounds.toText())
+            .query(rowMapper)
+            .list();
     }
 }

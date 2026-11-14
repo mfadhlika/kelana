@@ -75,6 +75,8 @@ public class ReverseGeocodeServiceTest {
             .thenReturn(Optional.of(l))
             .thenReturn(Optional.empty());
 
+        when(placeRepository.fetchPlaces(l.getGeometry().buffer(1))).thenReturn(new ArrayList<>());
+
         when(photonRepository.reverseGeocode(-6.1754, 106.8272, 3)).thenReturn(
             new FeatureCollection(
                 new ArrayList<>() {
