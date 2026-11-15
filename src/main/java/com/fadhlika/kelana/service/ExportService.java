@@ -82,7 +82,7 @@ public class ExportService {
                                 location.getGeocode(),
                                 location.getRawData());
 
-                        return new Feature(location.getGeometry(), props);
+                        return new Feature(location.getLonlat(), props);
                     }).toList();
 
             FeatureCollection featureCollection = new FeatureCollection(features);

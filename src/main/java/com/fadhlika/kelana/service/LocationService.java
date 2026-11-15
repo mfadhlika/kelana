@@ -143,7 +143,7 @@ public class LocationService {
                 location.getRawData());
 
         User user = userService.getUserByUserId(location.getUserId());
-        Feature feature = new Feature(location.getGeometry(), props);
+        Feature feature = new Feature(location.getLonlat(), props);
         String payload = mapper.writeValueAsString(feature);
         simpMessagingTemplate.convertAndSendToUser(user.getUsername(),
                 "/topic/last-known-location",

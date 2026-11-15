@@ -5,7 +5,7 @@ import java.time.ZonedDateTime;
 
 import org.locationtech.jts.geom.Geometry;
 
-import com.fadhlika.kelana.dto.FeatureCollection;
+import com.fadhlika.kelana.dto.Feature;
 import com.fadhlika.kelana.util.GeometryDeserializer;
 import com.fadhlika.kelana.util.GeometrySerializer;
 
@@ -15,7 +15,7 @@ import tools.jackson.databind.annotation.JsonSerialize;
 public record Place(
         int id,
         String provider,
-        @JsonSerialize(using = GeometrySerializer.class) @JsonDeserialize(using = GeometryDeserializer.class) Geometry geometry,
+        @JsonSerialize(using = GeometrySerializer.class) @JsonDeserialize(using = GeometryDeserializer.class) Geometry lonlat,
         String type,
         String postcode,
         String countryCode,
@@ -26,11 +26,11 @@ public record Place(
         String locality,
         String street,
         String state,
-        FeatureCollection geodata,
+        Feature geodata,
         ZonedDateTime createdAt) {
     public Place(
             String provider,
-            @JsonSerialize(using = GeometrySerializer.class) @JsonDeserialize(using = GeometryDeserializer.class) Geometry geometry,
+            @JsonSerialize(using = GeometrySerializer.class) @JsonDeserialize(using = GeometryDeserializer.class) Geometry lonlat,
             String type,
             String postcode,
             String countryCode,
@@ -41,8 +41,8 @@ public record Place(
             String locality,
             String street,
             String state,
-            FeatureCollection geodata) {
-        this(0, provider, geometry, type, postcode, countryCode, name, country, city, district, locality, street, state,
+            Feature geodata) {
+        this(0, provider, lonlat, type, postcode, countryCode, name, country, city, district, locality, street, state,
                 geodata, ZonedDateTime.now(ZoneOffset.UTC));
     }
 }

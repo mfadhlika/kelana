@@ -13,7 +13,7 @@ public class Region {
     int id;
     int userId;
     String desc;
-    Geometry geometry;
+    Geometry lonlat;
     String beaconUUID;
     Integer beaconMajor;
     Integer beaconMinor;
@@ -45,12 +45,12 @@ public class Region {
         this.desc = desc;
     }
 
-    public Geometry getGeometry() {
-        return geometry;
+    public Geometry getLonlat() {
+        return lonlat;
     }
 
-    public void setGeometry(Geometry geometry) {
-        this.geometry = geometry;
+    public void setLonlat(Geometry geometry) {
+        this.lonlat = geometry;
     }
 
     public String getBeaconUUID() {
@@ -102,7 +102,7 @@ public class Region {
     }
 
     public double getRadius() {
-        MinimumBoundingCircle circle = new MinimumBoundingCircle(this.getGeometry());
+        MinimumBoundingCircle circle = new MinimumBoundingCircle(this.getLonlat());
         return circle.getRadius() * 111320d;
     }
 
@@ -120,7 +120,7 @@ public class Region {
         this.id = id;
         this.userId = userId;
         this.desc = desc;
-        this.geometry = geometry;
+        this.lonlat = geometry;
         this.beaconUUID = beaconUUID;
         this.beaconMajor = beaconMajor;
         this.beaconMinor = beaconMinor;
@@ -155,7 +155,7 @@ public class Region {
 
         shape.setCentre(new Coordinate(lon, lat));
 
-        this.geometry = shape.createCircle();
+        this.lonlat = shape.createCircle();
 
         this.userId = userId;
         this.desc = desc;

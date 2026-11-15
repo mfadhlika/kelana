@@ -37,8 +37,7 @@ public class LocationRepository {
 
     @SuppressWarnings("unused")
     private static final Logger logger = LoggerFactory.getLogger(
-        LocationRepository.class
-    );
+            LocationRepository.class);
 
     private final JdbcClient jdbcClient;
 
@@ -46,62 +45,58 @@ public class LocationRepository {
 
     private final ObjectMapper mapper;
 
-    private final RowMapper<Location> locationRowMapper =
-        new RowMapper<Location>() {
-            @Override
-            public Location mapRow(ResultSet rs, int rowNum)
+    private final RowMapper<Location> locationRowMapper = new RowMapper<Location>() {
+        @Override
+        public Location mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
-                Location location;
-                byte[] point = rs.getBytes("geometry");
+            Location location;
+            byte[] point = rs.getBytes("lonlat");
+            try {
+                location = new Location(wkbReader.read(point));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+            location.setId(rs.getInt("id"));
+            location.setDeviceId(rs.getString("device_id"));
+            location.setAltitude(rs.getInt("altitude"));
+            location.setCourse(rs.getInt("course"));
+            location.setSpeed(rs.getDouble("speed"));
+            location.setAccuracy(rs.getInt("accuracy"));
+            location.setVerticalAccuracy(rs.getInt("vertical_accuracy"));
+            location.setBatteryState(rs.getInt("battery_state"));
+            location.setBattery(rs.getDouble("battery"));
+            location.setPressure(rs.getDouble("pressure"));
+            location.setSsid(rs.getString("ssid"));
+            location.setTimestamp(
+                    rs
+                            .getObject("timestamp", OffsetDateTime.class)
+                            .toZonedDateTime());
+            location.setCourseAccuracy(rs.getInt("course_accuracy"));
+            location.setCreatedAt(
+                    rs
+                            .getObject("created_at", OffsetDateTime.class)
+                            .toZonedDateTime());
+            location.setRawData(rs.getString("raw_data"));
+
+            Array motions = rs.getArray("motions");
+            if (motions != null)
+                location.setMotions(
+                        Arrays.stream((String[]) motions.getArray())
+                                .map(e -> e)
+                                .toList());
+
+            InputStream geocode = rs.getAsciiStream("geocode");
+            if (geocode != null) {
                 try {
-                    location = new Location(wkbReader.read(point));
-                } catch (ParseException e) {
+                    location.setGeocode(
+                            mapper.readValue(geocode, FeatureCollection.class));
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                location.setId(rs.getInt("id"));
-                location.setDeviceId(rs.getString("device_id"));
-                location.setAltitude(rs.getInt("altitude"));
-                location.setCourse(rs.getInt("course"));
-                location.setSpeed(rs.getDouble("speed"));
-                location.setAccuracy(rs.getInt("accuracy"));
-                location.setVerticalAccuracy(rs.getInt("vertical_accuracy"));
-                location.setBatteryState(rs.getInt("battery_state"));
-                location.setBattery(rs.getDouble("battery"));
-                location.setPressure(rs.getDouble("pressure"));
-                location.setSsid(rs.getString("ssid"));
-                location.setTimestamp(
-                    rs
-                        .getObject("timestamp", OffsetDateTime.class)
-                        .toZonedDateTime()
-                );
-                location.setCourseAccuracy(rs.getInt("course_accuracy"));
-                location.setCreatedAt(
-                    rs
-                        .getObject("created_at", OffsetDateTime.class)
-                        .toZonedDateTime()
-                );
-                location.setRawData(rs.getString("raw_data"));
-
-                Array motions = rs.getArray("motions");
-                if (motions != null) location.setMotions(
-                    Arrays.stream((String[]) motions.getArray())
-                        .map(e -> e)
-                        .toList()
-                );
-
-                InputStream geocode = rs.getAsciiStream("geocode");
-                if (geocode != null) {
-                    try {
-                        location.setGeocode(
-                            mapper.readValue(geocode, FeatureCollection.class)
-                        );
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                return location;
             }
-        };
+            return location;
+        }
+    };
 
     LocationRepository(JdbcClient jdbcClient, ObjectMapper mapper) {
         this.jdbcClient = jdbcClient;
@@ -109,74 +104,72 @@ public class LocationRepository {
     }
 
     public void createLocation(Location location)
-        throws DataAccessException, JsonProcessingException {
+            throws DataAccessException, JsonProcessingException {
         StringBuilder sqlBuilder = new StringBuilder("INSERT INTO location(");
         if (location.getId() != 0) {
             sqlBuilder.append("id, ");
         }
         sqlBuilder.append(
-            """
-            user_id,
-            device_id,
-            geometry,
-            altitude,
-            course,
-            course_accuracy,
-            speed,
-            accuracy,
-            vertical_accuracy,
-            motions,
-            battery_state,
-            battery,
-            pressure,
-            ssid,
-            timestamp,
-            raw_data,
-            created_at,
-            import_id,
-            geocode) VALUES("""
-        );
+                """
+                        user_id,
+                        device_id,
+                        lonlat,
+                        altitude,
+                        course,
+                        course_accuracy,
+                        speed,
+                        accuracy,
+                        vertical_accuracy,
+                        motions,
+                        battery_state,
+                        battery,
+                        pressure,
+                        ssid,
+                        timestamp,
+                        raw_data,
+                        created_at,
+                        import_id,
+                        geocode) VALUES(""");
         if (location.getId() != 0) {
             sqlBuilder.append(":id, ");
         }
         sqlBuilder.append(
-            """
-            :user_id, :device_id, ST_GeomFromText(:geometry), :altitude, :course, :course_accuracy,
-            :speed, :accuracy, :vertical_accuracy, :motions::text[], :battery_state, :battery, :pressure,
-            :ssid, :timestamp, :raw_data::json, :created_at, :import_id, :geocode::json)
-            ON CONFLICT (user_id, device_id, geometry, timestamp, import_id) DO UPDATE SET
-                        altitude = excluded.altitude,
-                        course = excluded.course,
-                        course_accuracy = excluded.course_accuracy,
-                        speed = excluded.speed,
-                        accuracy = excluded.accuracy,
-                        vertical_accuracy = excluded.vertical_accuracy,
-                        motions = excluded.motions,
-                        battery_state = excluded.battery_state,
-                        battery = excluded.battery,
-                        pressure = excluded.pressure,
-                        ssid = excluded.ssid,
-                        raw_data = excluded.raw_data,
-                        created_at = excluded.created_at,
-                        import_id = excluded.import_id,
-                        geocode = excluded.geocode
-                    """
-        );
+                """
+                        :user_id, :device_id, ST_GeogFromText(:lonlat), :altitude, :course, :course_accuracy,
+                        :speed, :accuracy, :vertical_accuracy, :motions::text[], :battery_state, :battery, :pressure,
+                        :ssid, :timestamp, :raw_data::json, :created_at, :import_id, :geocode::json)
+                        ON CONFLICT (user_id, device_id, lonlat, timestamp, import_id) DO UPDATE SET
+                                    altitude = excluded.altitude,
+                                    course = excluded.course,
+                                    course_accuracy = excluded.course_accuracy,
+                                    speed = excluded.speed,
+                                    accuracy = excluded.accuracy,
+                                    vertical_accuracy = excluded.vertical_accuracy,
+                                    motions = excluded.motions,
+                                    battery_state = excluded.battery_state,
+                                    battery = excluded.battery,
+                                    pressure = excluded.pressure,
+                                    ssid = excluded.ssid,
+                                    raw_data = excluded.raw_data,
+                                    created_at = excluded.created_at,
+                                    import_id = excluded.import_id,
+                                    geocode = excluded.geocode
+                                """);
 
         StatementSpec stmt = jdbcClient.sql(sqlBuilder.toString());
         if (location.getId() > 0) {
             stmt = stmt.param("id", location.getId());
         }
         stmt = stmt
-            .param("user_id", location.getUserId())
-            .param("device_id", location.getDeviceId())
-            .param("geometry", location.getGeometry().toText())
-            .param("altitude", location.getAltitude())
-            .param("course", location.getCourse())
-            .param("course_accuracy", location.getCourseAccuracy())
-            .param("speed", location.getSpeed())
-            .param("accuracy", location.getAccuracy())
-            .param("vertical_accuracy", location.getVerticalAccuracy());
+                .param("user_id", location.getUserId())
+                .param("device_id", location.getDeviceId())
+                .param("lonlat", location.getLonlat().toText())
+                .param("altitude", location.getAltitude())
+                .param("course", location.getCourse())
+                .param("course_accuracy", location.getCourseAccuracy())
+                .param("speed", location.getSpeed())
+                .param("accuracy", location.getAccuracy())
+                .param("vertical_accuracy", location.getVerticalAccuracy());
 
         String motionParam = null;
         if (location.getMotions() != null) {
@@ -184,97 +177,91 @@ public class LocationRepository {
         }
 
         stmt.param("motions", motionParam)
-            .param("battery_state", location.getBatteryState().value)
-            .param("battery", location.getBattery())
-            .param("pressure", location.getPressure())
-            .param("ssid", location.getSsid())
-            .param("timestamp", location.getTimestamp().toOffsetDateTime())
-            .param("raw_data", location.getRawData())
-            .param("created_at", location.getCreatedAt().toOffsetDateTime())
-            .param("import_id", location.getImportId())
-            .param("geocode", mapper.writeValueAsString(location.getGeocode()))
-            .update();
+                .param("battery_state", location.getBatteryState().value)
+                .param("battery", location.getBattery())
+                .param("pressure", location.getPressure())
+                .param("ssid", location.getSsid())
+                .param("timestamp", location.getTimestamp().toOffsetDateTime())
+                .param("raw_data", location.getRawData())
+                .param("created_at", location.getCreatedAt().toOffsetDateTime())
+                .param("import_id", location.getImportId())
+                .param("geocode", mapper.writeValueAsString(location.getGeocode()))
+                .update();
     }
 
     public List<Location> findLocations(
-        Optional<Integer> userId,
-        Optional<ZonedDateTime> start,
-        Optional<ZonedDateTime> end,
-        Optional<String> device,
-        Optional<String> order,
-        Optional<Boolean> desc,
-        Optional<Integer> offset,
-        Optional<Integer> limit,
-        Optional<Geometry> bounds
-    ) {
+            Optional<Integer> userId,
+            Optional<ZonedDateTime> start,
+            Optional<ZonedDateTime> end,
+            Optional<String> device,
+            Optional<String> order,
+            Optional<Boolean> desc,
+            Optional<Integer> offset,
+            Optional<Integer> limit,
+            Optional<Geometry> bounds) {
         return findLocationsStatementSpecBuilder(
-            userId,
-            start,
-            end,
-            device,
-            order,
-            desc,
-            offset,
-            limit,
-            Optional.empty(),
-            Optional.empty(),
-            bounds
-        ).list();
+                userId,
+                start,
+                end,
+                device,
+                order,
+                desc,
+                offset,
+                limit,
+                Optional.empty(),
+                Optional.empty(),
+                bounds).list();
     }
 
     public Optional<Location> findLocation(
-        Optional<Integer> userId,
-        Optional<ZonedDateTime> start,
-        Optional<ZonedDateTime> end,
-        Optional<String> device,
-        Optional<String> order,
-        Optional<Boolean> desc,
-        Optional<Boolean> geocoded
-    ) {
+            Optional<Integer> userId,
+            Optional<ZonedDateTime> start,
+            Optional<ZonedDateTime> end,
+            Optional<String> device,
+            Optional<String> order,
+            Optional<Boolean> desc,
+            Optional<Boolean> geocoded) {
         return findLocationsStatementSpecBuilder(
-            userId,
-            start,
-            end,
-            device,
-            order,
-            desc,
-            Optional.empty(),
-            Optional.of(1),
-            Optional.empty(),
-            geocoded,
-            Optional.empty()
-        ).optional();
+                userId,
+                start,
+                end,
+                device,
+                order,
+                desc,
+                Optional.empty(),
+                Optional.of(1),
+                Optional.empty(),
+                geocoded,
+                Optional.empty()).optional();
     }
 
     public Location findLocation(int id) {
         return findLocationsStatementSpecBuilder(
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of(1),
-            Optional.of(id),
-            Optional.empty(),
-            Optional.empty()
-        ).single();
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.of(1),
+                Optional.of(id),
+                Optional.empty(),
+                Optional.empty()).single();
     }
 
     private MappedQuerySpec<Location> findLocationsStatementSpecBuilder(
-        Optional<Integer> userId,
-        Optional<ZonedDateTime> start,
-        Optional<ZonedDateTime> end,
-        Optional<String> device,
-        Optional<String> order,
-        Optional<Boolean> desc,
-        Optional<Integer> offset,
-        Optional<Integer> limit,
-        Optional<Integer> id,
-        Optional<Boolean> geocoded,
-        Optional<Geometry> bounds
-    ) {
+            Optional<Integer> userId,
+            Optional<ZonedDateTime> start,
+            Optional<ZonedDateTime> end,
+            Optional<String> device,
+            Optional<String> order,
+            Optional<Boolean> desc,
+            Optional<Integer> offset,
+            Optional<Integer> limit,
+            Optional<Integer> id,
+            Optional<Boolean> geocoded,
+            Optional<Geometry> bounds) {
         List<String> where = new ArrayList<>();
 
         HashMap<String, Object> args = new HashMap<String, Object>();
@@ -304,39 +291,40 @@ public class LocationRepository {
         });
 
         geocoded.ifPresent(v -> {
-            if (v) where.add("geocode IS NOT NULL OR geocode != 'null'");
-            else where.add("geocode IS NULL OR geocode = 'null'");
+            if (v)
+                where.add("geocode IS NOT NULL OR geocode != 'null'");
+            else
+                where.add("geocode IS NULL OR geocode = 'null'");
         });
 
         bounds.ifPresent(b -> {
-            where.add("ST_CoveredBy(geometry, ST_GeomFromText(:bounds))");
+            where.add("ST_CoveredBy(lonlat, ST_GeogFromText(:bounds))");
             args.put("bounds", b.toText());
         });
 
         StringBuilder sqlBuilder = new StringBuilder(
-            """
-            SELECT
-                id,
-                user_id,
-                device_id,
-                ST_AsBinary(geometry) AS geometry,
-                altitude,
-                course,
-                speed,
-                accuracy,
-                vertical_accuracy,
-                motions,
-                battery_state,
-                battery,
-                pressure,
-                ssid,
-                raw_data::json AS raw_data,
-                timestamp,
-                created_at,
-                import_id,
-                course_accuracy,
-                geocode::json AS geocode FROM location"""
-        );
+                """
+                        SELECT
+                            id,
+                            user_id,
+                            device_id,
+                            ST_AsBinary(lonlat) AS lonlat,
+                            altitude,
+                            course,
+                            speed,
+                            accuracy,
+                            vertical_accuracy,
+                            motions,
+                            battery_state,
+                            battery,
+                            pressure,
+                            ssid,
+                            raw_data::json AS raw_data,
+                            timestamp,
+                            created_at,
+                            import_id,
+                            course_accuracy,
+                            geocode::json AS geocode FROM location""");
         if (!where.isEmpty()) {
             sqlBuilder.append(" WHERE ");
             sqlBuilder.append(String.join(" AND ", where));
@@ -346,7 +334,8 @@ public class LocationRepository {
         sqlBuilder.append(order.orElse("timestamp"));
 
         desc.ifPresent(v -> {
-            if (v) sqlBuilder.append(" DESC");
+            if (v)
+                sqlBuilder.append(" DESC");
         });
 
         limit.ifPresent(l -> {
@@ -360,26 +349,26 @@ public class LocationRepository {
         });
 
         return jdbcClient
-            .sql(sqlBuilder.toString())
-            .params(args)
-            .query(locationRowMapper);
+                .sql(sqlBuilder.toString())
+                .params(args)
+                .query(locationRowMapper);
     }
 
     public void updateGeocode(int id, FeatureCollection geocode)
-        throws JsonProcessingException {
+            throws JsonProcessingException {
         jdbcClient
-            .sql("UPDATE location SET geocode = ?::jsonb WHERE id = ?")
-            .param(mapper.writeValueAsString(geocode))
-            .param(id)
-            .update();
+                .sql("UPDATE location SET geocode = ?::jsonb WHERE id = ?")
+                .param(mapper.writeValueAsString(geocode))
+                .param(id)
+                .update();
     }
 
     public void updatePlace(int id, int placeId)
-        throws JsonProcessingException {
+            throws JsonProcessingException {
         jdbcClient
-            .sql("UPDATE location SET place_id = ? WHERE id = ?")
-            .param(placeId)
-            .param(id)
-            .update();
+                .sql("UPDATE location SET place_id = ? WHERE id = ?")
+                .param(placeId)
+                .param(id)
+                .update();
     }
 }

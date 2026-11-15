@@ -78,7 +78,7 @@ public class LocationController {
                                                         curr.getSsid(),
                                                         curr.getGeocode(),
                                                         curr.getRawData());
-                                        return new Feature(curr.getGeometry(), props);
+                                        return new Feature(curr.getLonlat(), props);
                                 }).toList();
 
                 return new Response<>(new FeatureCollection(features));
@@ -110,7 +110,7 @@ public class LocationController {
                                         location.getGeocode(),
                                         location.getRawData());
 
-                        Feature feature = new Feature(location.getGeometry(), props);
+                        Feature feature = new Feature(location.getLonlat(), props);
                         return ResponseEntity.ok().body(new Response<>(feature, "success"));
                 } catch (NoSuchElementException e) {
                         return ResponseEntity.status(HttpStatus.NO_CONTENT)

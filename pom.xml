@@ -87,6 +87,21 @@
 			<version>1.20.0</version>
 		</dependency>
 		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-shapefile</artifactId>
+			<version>35.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-swing</artifactId>
+			<version>35.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-epsg-hsql</artifactId>
+			<version>35.2</version>
+		</dependency>
+		<dependency>
 			<groupId>com.auth0</groupId>
 			<artifactId>java-jwt</artifactId>
 			<version>4.5.0</version>
@@ -123,7 +138,18 @@
 			<version>1.2.5</version>
 		</dependency>
 	</dependencies>
-
+	<repositories>
+		<repository>
+			<id>osgeo</id>
+			<url>https://repo.osgeo.org/repository/release/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 	<build>
 		<plugins>
 			<plugin>

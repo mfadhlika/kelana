@@ -47,7 +47,7 @@ public class LocationTest {
                 GeometryFactory gf = new GeometryFactory();
                 Point expectedPoint = gf.createPoint(new Coordinate(12.34567, -1.23456));
 
-                assertEquals(expectedPoint, location.getGeometry());
+                assertEquals(expectedPoint, location.getLonlat());
                 assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochSecond(1672531200), ZoneOffset.UTC),
                                 location.getTimestamp());
         }
@@ -76,7 +76,7 @@ public class LocationTest {
                 GeometryFactory gf = new GeometryFactory();
                 Point expectedPoint = gf.createPoint(new Coordinate(12.34567, -1.23456));
 
-                assertEquals(expectedPoint, location.getGeometry());
+                assertEquals(expectedPoint, location.getLonlat());
                 assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochSecond(1672531200), ZoneOffset.UTC),
                                 location.getTimestamp());
                 assertEquals(10, location.getAccuracy());
@@ -110,7 +110,7 @@ public class LocationTest {
                 GeometryFactory gf = new GeometryFactory();
                 Point expectedPoint = gf.createPoint(new Coordinate(12.34567, -1.23456));
 
-                assertEquals(expectedPoint, location.getGeometry());
+                assertEquals(expectedPoint, location.getLonlat());
                 assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochSecond(1672531200), ZoneOffset.UTC),
                                 location.getTimestamp());
                 assertEquals(10, location.getAccuracy());

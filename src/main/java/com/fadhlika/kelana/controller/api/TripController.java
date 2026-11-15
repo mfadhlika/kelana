@@ -84,8 +84,8 @@ public class TripController {
                 }
 
                 Coordinate[] twoPoints = {
-                        prev.getGeometry().getCoordinate(),
-                        curr.getGeometry().getCoordinate()
+                        prev.getLonlat().getCoordinate(),
+                        curr.getLonlat().getCoordinate()
                 };
 
                 GeometryFactory gf1 = new GeometryFactory();
@@ -133,8 +133,8 @@ public class TripController {
             }
 
             Coordinate[] twoPoints = {
-                    prev.getGeometry().getCoordinate(),
-                    curr.getGeometry().getCoordinate()
+                    prev.getLonlat().getCoordinate(),
+                    curr.getLonlat().getCoordinate()
             };
 
             GeometryFactory gf1 = new GeometryFactory();

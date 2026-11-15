@@ -44,7 +44,7 @@ public class RegionController {
                     curr.getGeocode(),
                     curr.getCreatedAt());
 
-            return new Feature(curr.getGeometry(), props);
+            return new Feature(curr.getLonlat(), props);
         }).toList();
 
         return new Response<>(new FeatureCollection(features));

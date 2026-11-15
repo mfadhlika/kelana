@@ -80,7 +80,7 @@ public class OwntracksService {
 
         List<Waypoint> waypoints = this.regionService.fetchRegions(user.getId()).stream()
                 .map(region -> {
-                    Coordinate coord = region.getGeometry().getCoordinate();
+                    Coordinate coord = region.getLonlat().getCoordinate();
 
                     return new Waypoint(
                             region.getDesc(),
@@ -163,7 +163,7 @@ public class OwntracksService {
                 case "setWaypoints":
                     List<Waypoint> waypoints = this.regionService.fetchRegions(user.getId()).stream()
                             .map(region -> {
-                                Coordinate coord = region.getGeometry().getCoordinate();
+                                Coordinate coord = region.getLonlat().getCoordinate();
 
                                 return new Waypoint(
                                         region.getDesc(),

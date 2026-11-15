@@ -63,7 +63,7 @@ public class Location {
     private String deviceId;
     @JsonSerialize(using = GeometrySerializer.class)
     @JsonDeserialize(using = GeometryDeserializer.class)
-    private Geometry geometry;
+    private Geometry lonlat;
     private ZonedDateTime timestamp;
     private Integer altitude;
     private Integer course;
@@ -83,13 +83,13 @@ public class Location {
     private Integer placeId;
 
     public Location(Geometry point) {
-        this.geometry = point;
+        this.lonlat = point;
         this.createdAt = ZonedDateTime.now(ZoneOffset.UTC);
     }
 
     public Location(double lat, double lon) {
         GeometryFactory gf = new GeometryFactory();
-        this.geometry = gf.createPoint(new Coordinate(lon, lat));
+        this.lonlat = gf.createPoint(new Coordinate(lon, lat));
         this.createdAt = ZonedDateTime.now(ZoneOffset.UTC);
     }
 
@@ -113,12 +113,12 @@ public class Location {
         return deviceId;
     }
 
-    public void setGeometry(Geometry geometry) {
-        this.geometry = geometry;
+    public void setLonlat(Geometry geometry) {
+        this.lonlat = geometry;
     }
 
-    public Geometry getGeometry() {
-        return geometry;
+    public Geometry getLonlat() {
+        return lonlat;
     }
 
     public void setDeviceId(String deviceId) {
@@ -282,7 +282,7 @@ public class Location {
     }
 
     public double getDistanceInMeters(Location location) {
-        Double distance = Math.abs(this.geometry.distance(location.geometry));
+        Double distance = Math.abs(this.lonlat.distance(location.lonlat));
 
         return distance * Math.PI / 180 * R;
     }

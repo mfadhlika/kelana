@@ -35,15 +35,15 @@ public class RegionRepository {
             } catch (Exception e) {
             }
         }
-        byte[] point = rs.getBytes("geometry");
-        Geometry geometry;
+        byte[] point = rs.getBytes("lonlat");
+        Geometry lonlat;
         try {
-            geometry = wkbReader.read(point);
+            lonlat = wkbReader.read(point);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
 
-        return new Region(rs.getInt("id"), rs.getInt("user_id"), rs.getString("desc"), geometry,
+        return new Region(rs.getInt("id"), rs.getInt("user_id"), rs.getString("desc"), lonlat,
                 rs.getString("beacon_uuid"), rs.getInt("beacon_major"),
                 rs.getInt("beacon_minor"), rs.getString("rid"), geocode,
                 rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
@@ -59,10 +59,10 @@ public class RegionRepository {
         List<Object> values = new ArrayList<>();
 
         for (Region region : regions) {
-            params.add("(?, ?, ST_GeomFromText(?), ?, ?, ?, ?, ?::jsonb, ?)");
+            params.add("(?, ?, ST_GeogFromText(?), ?, ?, ?, ?, ?::jsonb, ?)");
             values.add(region.getUserId());
             values.add(region.getDesc());
-            values.add(region.getGeometry().toText());
+            values.add(region.getLonlat().toText());
             values.add(region.getBeaconUUID());
             values.add(region.getBeaconMajor());
             values.add(region.getBeaconMinor());
@@ -73,11 +73,11 @@ public class RegionRepository {
         jdbcClient
                 .sql(String.format(
                         """
-                                INSERT INTO region(user_id, "desc", geometry, beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at)
+                                INSERT INTO region(user_id, "desc", lonlat, beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at)
                                 VALUES %s
                                 ON CONFLICT (rid) DO UPDATE SET
                                     "desc" = excluded."desc",
-                                    geometry = excluded.geometry,
+                                    lonlat = excluded.lonlat,
                                     beacon_uuid = excluded.beacon_uuid,
                                     beacon_major = excluded.beacon_major,
                                     beacon_minor = excluded.beacon_minor""",
@@ -88,7 +88,7 @@ public class RegionRepository {
 
     public List<Region> fetchRegions(int userId) {
         return jdbcClient.sql(
-                "SELECT id, user_id, \"desc\", ST_AsBinary(geometry) AS geometry,  beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at FROM region WHERE user_id = ?")
+                "SELECT id, user_id, \"desc\", ST_AsBinary(lonlat) AS lonlat,  beacon_uuid, beacon_major, beacon_minor, rid, geocode, created_at FROM region WHERE user_id = ?")
                 .param(userId).query(rowMapper).list();
     }
 }
