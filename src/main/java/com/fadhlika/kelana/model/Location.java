@@ -90,6 +90,7 @@ public class Location {
     public Location(double lat, double lon) {
         GeometryFactory gf = new GeometryFactory();
         this.lonlat = gf.createPoint(new Coordinate(lon, lat));
+        this.lonlat.setSRID(4326);
         this.createdAt = ZonedDateTime.now(ZoneOffset.UTC);
     }
 

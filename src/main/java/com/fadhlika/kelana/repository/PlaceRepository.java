@@ -224,6 +224,34 @@ public class PlaceRepository {
         return jdbcClient.sql(sql).params(args).query(rowMapper).list();
     }
 
+    public List<Place> fetchPlaces(Double lon, Double lat, Double rad) {
+        return jdbcClient
+                .sql(
+                        """
+                                SELECT
+                                    id,
+                                    provider,
+                                    type,
+                                    postcode,
+                                    country_code,
+                                    name,
+                                    country,
+                                    city,
+                                    district,
+                                    locality,
+                                    street,
+                                    state,
+                                    ST_AsBinary(lonlat) AS lonlat,
+                                    geodata,
+                                    created_at
+                                FROM place WHERE ST_DWithin(lonlat, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography, ?)""")
+                .param(lon)
+                .param(lat)
+                .param(rad)
+                .query(rowMapper)
+                .list();
+    }
+
     public List<Place> fetchPlaces(Geometry bounds) {
         return jdbcClient
                 .sql(
@@ -244,7 +272,7 @@ public class PlaceRepository {
                                     ST_AsBinary(lonlat) AS lonlat,
                                     geodata,
                                     created_at
-                                FROM place WHERE ST_CoveredBy(lonlat, ST_GeogFromText(?))""")
+                                FROM place WHERE ST_DWithin(lonlat, ST_GeogFromText(bounds, 4326))""")
                 .param(bounds.toText())
                 .query(rowMapper)
                 .list();

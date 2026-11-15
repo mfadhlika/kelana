@@ -138,7 +138,7 @@ public class LocationRepository {
                         :user_id, :device_id, ST_GeogFromText(:lonlat), :altitude, :course, :course_accuracy,
                         :speed, :accuracy, :vertical_accuracy, :motions::text[], :battery_state, :battery, :pressure,
                         :ssid, :timestamp, :raw_data::json, :created_at, :import_id, :geocode::json)
-                        ON CONFLICT (user_id, device_id, lonlat, timestamp, import_id) DO UPDATE SET
+                        ON CONFLICT (user_id, device_id, lonlat, timestamp) DO UPDATE SET
                                     altitude = excluded.altitude,
                                     course = excluded.course,
                                     course_accuracy = excluded.course_accuracy,

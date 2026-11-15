@@ -37,10 +37,10 @@ public class PlaceController {
 
     @GetMapping("/search")
     public Response<List<Place>> findPlaces(
-            @RequestParam Double lat,
             @RequestParam Double lon,
+            @RequestParam Double lat,
             @RequestParam Double rad) throws Exception {
-        List<Place> places = placeService.fetchPlaces(lat, lon, rad);
+        List<Place> places = placeService.fetchPlaces(lon, lat, rad);
 
         return new Response<List<Place>>(places);
     }
