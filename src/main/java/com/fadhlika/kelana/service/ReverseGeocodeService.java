@@ -77,7 +77,7 @@ public class ReverseGeocodeService {
                 Coordinate coord = l.getLonlat().getCoordinate();
                 try {
                     List<Place> places = placeRepository.fetchPlaces(
-                            l.getLonlat().buffer(1));
+                            l.getLonlat().buffer(100));
                     Optional<Place> place = places.stream().findFirst();
 
                     if (places.isEmpty()) {

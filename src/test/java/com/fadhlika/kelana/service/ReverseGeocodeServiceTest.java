@@ -32,119 +32,119 @@ import tools.jackson.databind.ObjectMapper;
 @ExtendWith(MockitoExtension.class)
 public class ReverseGeocodeServiceTest {
 
-    @InjectMocks
-    private ReverseGeocodeService reverseGeocodeService;
+        @InjectMocks
+        private ReverseGeocodeService reverseGeocodeService;
 
-    @Mock
-    private LocationRepository locationRepository;
+        @Mock
+        private LocationRepository locationRepository;
 
-    @Mock
-    private PhotonRepository photonRepository;
+        @Mock
+        private PhotonRepository photonRepository;
 
-    @Mock
-    private PlaceRepository placeRepository;
+        @Mock
+        private PlaceRepository placeRepository;
 
-    @Mock
-    private PlatformTransactionManager transactionManager;
+        @Mock
+        private PlatformTransactionManager transactionManager;
 
-    @Mock
-    private ObjectMapper mapper;
+        @Mock
+        private ObjectMapper mapper;
 
-    @Test
-    public void testReverseGeocodeLocation()
-            throws IOException, InterruptedException {
-        Location l = new Location(-6.1754, 106.8272) {
-            {
-                setId(1);
-                setUserId(1);
-                setTimestamp(ZonedDateTime.now(ZoneOffset.UTC));
-            }
-        };
+        @Test
+        public void testReverseGeocodeLocation()
+                        throws IOException, InterruptedException {
+                Location l = new Location(-6.1754, 106.8272) {
+                        {
+                                setId(1);
+                                setUserId(1);
+                                setTimestamp(ZonedDateTime.now(ZoneOffset.UTC));
+                        }
+                };
 
-        when(
-                locationRepository.findLocation(
-                        Optional.empty(),
-                        Optional.empty(),
-                        Optional.empty(),
-                        Optional.empty(),
-                        Optional.empty(),
-                        Optional.empty(),
-                        Optional.of(false)))
-                .thenReturn(Optional.of(l))
-                .thenReturn(Optional.empty());
+                when(
+                                locationRepository.findLocation(
+                                                Optional.empty(),
+                                                Optional.empty(),
+                                                Optional.empty(),
+                                                Optional.empty(),
+                                                Optional.empty(),
+                                                Optional.empty(),
+                                                Optional.of(false)))
+                                .thenReturn(Optional.of(l))
+                                .thenReturn(Optional.empty());
 
-        when(placeRepository.fetchPlaces(l.getLonlat().buffer(1))).thenReturn(new ArrayList<>());
+                when(placeRepository.fetchPlaces(l.getLonlat().buffer(100))).thenReturn(new ArrayList<>());
 
-        when(photonRepository.reverseGeocode(-6.1754, 106.8272, 3)).thenReturn(
-                new FeatureCollection(
-                        new ArrayList<>() {
-                            {
-                                add(
-                                        new Feature(
+                when(photonRepository.reverseGeocode(-6.1754, 106.8272, 3)).thenReturn(
+                                new FeatureCollection(
+                                                new ArrayList<>() {
+                                                        {
+                                                                add(
+                                                                                new Feature(
+                                                                                                l.getLonlat(),
+                                                                                                new GeocodeProperties(
+                                                                                                                "W",
+                                                                                                                1159084257,
+                                                                                                                "historic",
+                                                                                                                "monument",
+                                                                                                                "house",
+                                                                                                                "10110",
+                                                                                                                "ID",
+                                                                                                                "Monumen Nasional",
+                                                                                                                "Indonesia",
+                                                                                                                "Jakarta",
+                                                                                                                "Gambir",
+                                                                                                                "RW 02",
+                                                                                                                "Jalan Medan Merdeka Utara",
+                                                                                                                "Jawa",
+                                                                                                                "",
+                                                                                                                "",
+                                                                                                                new ArrayList<>() {
+                                                                                                                        {
+                                                                                                                                add(106.8267455);
+                                                                                                                                add(-6.1749898);
+                                                                                                                                add(106.8275888);
+                                                                                                                                add(-6.1758248);
+                                                                                                                        }
+                                                                                                                })));
+                                                        }
+                                                }));
+
+                doNothing().when(locationRepository).updatePlace(eq(1), eq(1));
+
+                doReturn(
+                                new Place(
+                                                1,
+                                                "photon",
                                                 l.getLonlat(),
-                                                new GeocodeProperties(
-                                                        "W",
-                                                        1159084257,
-                                                        "historic",
-                                                        "monument",
-                                                        "house",
-                                                        "10110",
-                                                        "ID",
-                                                        "Monumen Nasional",
-                                                        "Indonesia",
-                                                        "Jakarta",
-                                                        "Gambir",
-                                                        "RW 02",
-                                                        "Jalan Medan Merdeka Utara",
-                                                        "Jawa",
-                                                        "",
-                                                        "",
-                                                        new ArrayList<>() {
-                                                            {
-                                                                add(106.8267455);
-                                                                add(-6.1749898);
-                                                                add(106.8275888);
-                                                                add(-6.1758248);
-                                                            }
-                                                        })));
-                            }
-                        }));
+                                                "type",
+                                                "postcode",
+                                                "countryCode",
+                                                "name",
+                                                "country",
+                                                "city",
+                                                "district",
+                                                "locality",
+                                                "street",
+                                                "state",
+                                                null,
+                                                ZonedDateTime.now()))
+                                .when(placeRepository)
+                                .createPlace(any(Place.class));
 
-        doNothing().when(locationRepository).updatePlace(eq(1), eq(1));
+                reverseGeocodeService.processReverseGeocode();
 
-        doReturn(
-                new Place(
-                        1,
-                        "photon",
-                        l.getLonlat(),
-                        "type",
-                        "postcode",
-                        "countryCode",
-                        "name",
-                        "country",
-                        "city",
-                        "district",
-                        "locality",
-                        "street",
-                        "state",
-                        null,
-                        ZonedDateTime.now()))
-                .when(placeRepository)
-                .createPlace(any(Place.class));
+                verify(photonRepository).reverseGeocode(-6.1754, 106.8272, 3);
 
-        reverseGeocodeService.processReverseGeocode();
+                verify(locationRepository, times(2)).findLocation(
+                                Optional.empty(),
+                                Optional.empty(),
+                                Optional.empty(),
+                                Optional.empty(),
+                                Optional.empty(),
+                                Optional.empty(),
+                                Optional.of(false));
 
-        verify(photonRepository).reverseGeocode(-6.1754, 106.8272, 3);
-
-        verify(locationRepository, times(2)).findLocation(
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.empty(),
-                Optional.of(false));
-
-        verify(placeRepository, times(1)).createPlace(any(Place.class));
-    }
+                verify(placeRepository, times(1)).createPlace(any(Place.class));
+        }
 }

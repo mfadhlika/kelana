@@ -272,7 +272,7 @@ public class PlaceRepository {
                                     ST_AsBinary(lonlat) AS lonlat,
                                     geodata,
                                     created_at
-                                FROM place WHERE ST_DWithin(lonlat, ST_GeogFromText(bounds, 4326))""")
+                                FROM place WHERE ST_DWithin(lonlat, ST_GeogFromText(?))""")
                 .param(bounds.toText())
                 .query(rowMapper)
                 .list();
