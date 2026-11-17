@@ -1,10 +1,14 @@
 package com.fadhlika.kelana.controller.api;
 
+import com.fadhlika.kelana.dto.Feature;
+import com.fadhlika.kelana.dto.FeatureCollection;
+import com.fadhlika.kelana.dto.PlaceProperties;
 import com.fadhlika.kelana.dto.Response;
 import com.fadhlika.kelana.model.Place;
 import com.fadhlika.kelana.service.PlaceService;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,27 +25,20 @@ public class PlaceController {
     }
 
     @GetMapping
-    public Response<List<Place>> fetchPlaces(
-            @RequestParam Optional<String> city,
-            @RequestParam Optional<String> country,
-            @RequestParam Optional<Integer> limit,
-            @RequestParam Optional<Integer> offset) {
-        List<Place> places = placeService.fetchPlaces(
-                city,
-                country,
-                limit,
-                offset);
-
-        return new Response<List<Place>>(places);
-    }
-
-    @GetMapping("/search")
-    public Response<List<Place>> findPlaces(
+    public Response<FeatureCollection> findPlaces(
             @RequestParam Double lon,
             @RequestParam Double lat,
             @RequestParam Double rad) throws Exception {
         List<Place> places = placeService.fetchPlaces(lon, lat, rad);
 
-        return new Response<List<Place>>(places);
+        List<Feature> features = new ArrayList<>();
+        for (Place place : places) {
+            PlaceProperties props = new PlaceProperties(place.type(), place.postcode(), place.countryCode(),
+                    place.name(), place.countryCode(), place.city(), place.district(), place.locality(), place.street(),
+                    place.state());
+            features.add(new Feature(place.lonlat(), props));
+        }
+
+        return new Response<>(new FeatureCollection(features));
     }
 }

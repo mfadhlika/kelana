@@ -1,9 +1,14 @@
 package com.fadhlika.kelana.service;
 
+import com.fadhlika.kelana.dto.FeatureCollection;
+import com.fadhlika.kelana.dto.GeocodeProperties;
 import com.fadhlika.kelana.model.Place;
+import com.fadhlika.kelana.repository.PhotonRepository;
 import com.fadhlika.kelana.repository.PlaceRepository;
+
+import tools.jackson.core.type.TypeReference;
+
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -12,25 +17,42 @@ public class PlaceService {
 
     private final PlaceRepository placeRepository;
 
-    PlaceService(PlaceRepository placeRepository) {
-        this.placeRepository = placeRepository;
-    }
+    private final PhotonRepository photonRepository;
 
-    public List<Place> fetchPlaces(
-            Optional<String> city,
-            Optional<String> country,
-            Optional<Integer> limit,
-            Optional<Integer> offset) {
-        try {
-            return placeRepository.fetchPlaces(city, country, limit, offset);
-        } catch (Exception e) {
-            throw e;
-        }
+    PlaceService(PlaceRepository placeRepository, PhotonRepository photonRepository) {
+        this.placeRepository = placeRepository;
+        this.photonRepository = photonRepository;
     }
 
     public List<Place> fetchPlaces(Double lon, Double lat, Double rad) throws Exception {
         try {
-            return placeRepository.fetchPlaces(lon, lat, rad);
+            List<Place> places = placeRepository.fetchPlaces(lon, lat, rad);
+
+            if (places.isEmpty()) {
+                FeatureCollection res = photonRepository.reverseGeocode(lat, lon, (int) Math.round(rad));
+                places = res.features().stream().map(feature -> {
+                    GeocodeProperties props = feature.convertProperties(
+                            new TypeReference<GeocodeProperties>() {
+                            });
+
+                    return new Place(
+                            "photon",
+                            feature.getGeometry(),
+                            props.type(),
+                            props.postcode(),
+                            props.countrycode(),
+                            props.name(),
+                            props.country(),
+                            props.country(),
+                            props.district(),
+                            props.locality(),
+                            props.street(),
+                            props.state(),
+                            feature);
+                }).toList();
+            }
+
+            return places;
         } catch (Exception e) {
             throw e;
         }

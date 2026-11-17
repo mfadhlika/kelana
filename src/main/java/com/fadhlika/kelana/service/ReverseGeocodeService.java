@@ -83,8 +83,7 @@ public class ReverseGeocodeService {
                     if (places.isEmpty()) {
                         FeatureCollection geocode = photonRepository.reverseGeocode(
                                 coord.y,
-                                coord.x,
-                                3);
+                                coord.x);
 
                         for (int j = 0; j < geocode.features().size(); j++) {
                             Feature feature = geocode.features().get(j);

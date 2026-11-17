@@ -75,7 +75,7 @@ public class ReverseGeocodeServiceTest {
 
                 when(placeRepository.fetchPlaces(l.getLonlat().buffer(100))).thenReturn(new ArrayList<>());
 
-                when(photonRepository.reverseGeocode(-6.1754, 106.8272, 3)).thenReturn(
+                when(photonRepository.reverseGeocode(-6.1754, 106.8272)).thenReturn(
                                 new FeatureCollection(
                                                 new ArrayList<>() {
                                                         {
@@ -134,7 +134,7 @@ public class ReverseGeocodeServiceTest {
 
                 reverseGeocodeService.processReverseGeocode();
 
-                verify(photonRepository).reverseGeocode(-6.1754, 106.8272, 3);
+                verify(photonRepository).reverseGeocode(-6.1754, 106.8272);
 
                 verify(locationRepository, times(2)).findLocation(
                                 Optional.empty(),

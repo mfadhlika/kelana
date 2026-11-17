@@ -37,31 +37,27 @@ public class PhotonRepository {
         mapper = new ObjectMapper();
     }
 
-    public FeatureCollection reverseGeocode(double lat, double lon) throws IOException, InterruptedException {
-        return reverseGeocode(lat, lon, 0);
+    public FeatureCollection reverseGeocode(double lat, double lon)
+            throws IOException, InterruptedException {
+        return reverseGeocode(lat, lon, 10);
     }
 
-    public FeatureCollection reverseGeocode(double lat, double lon, int retry)
+    public FeatureCollection reverseGeocode(double lat, double lon, int rad)
             throws IOException, InterruptedException {
         URI uri = URI
-                .create(String.format("%s/reverse?lat=%s&lon=%s", baseUrl, Double.toString(lat), Double.toString(lon)));
+                .create(String.format("%s/reverse?lat=%s&lon=%s&radius=%d", baseUrl, Double.toString(lat),
+                        Double.toString(lon), rad));
         HttpRequest req = HttpRequest.newBuilder(uri).GET().build();
 
         logger.info("requesting {}", uri.toString());
 
-        int i = 0;
-        do {
-            i++;
+        HttpResponse<InputStream> res = client.send(req, BodyHandlers.ofInputStream());
+        if (res.statusCode() == HttpStatus.OK.value()) {
+            return mapper.readValue(res.body(), FeatureCollection.class);
+        }
 
-            HttpResponse<InputStream> res = client.send(req, BodyHandlers.ofInputStream());
-            if (res.statusCode() == HttpStatus.OK.value()) {
-                return mapper.readValue(res.body(), FeatureCollection.class);
-            }
+        String message = new String(res.body().readAllBytes(), StandardCharsets.UTF_8);
 
-            String message = new String(res.body().readAllBytes(), StandardCharsets.UTF_8);
-            logger.error("error while fetch reverse geocode: {}", message);
-        } while (i <= retry);
-
-        throw new InternalErrorException("");
+        throw new InternalErrorException(message);
     }
 }
