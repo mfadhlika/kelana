@@ -254,25 +254,25 @@ public class PlaceRepository {
 
     public List<Place> fetchPlaces(Geometry bounds) {
         return jdbcClient
-                .sql(
-                        """
-                                SELECT
-                                    id,
-                                    provider,
-                                    type,
-                                    postcode,
-                                    country_code,
-                                    name,
-                                    country,
-                                    city,
-                                    district,
-                                    locality,
-                                    street,
-                                    state,
-                                    ST_AsBinary(lonlat) AS lonlat,
-                                    geodata,
-                                    created_at
-                                FROM place WHERE ST_DWithin(lonlat, ST_GeogFromText(?))""")
+                .sql("""
+                        SELECT
+                            id,
+                            provider,
+                            type,
+                            postcode,
+                            country_code,
+                            name,
+                            country,
+                            city,
+                            district,
+                            locality,
+                            street,
+                            state,
+                            ST_AsBinary(lonlat) AS lonlat,
+                            geodata,
+                            created_at
+                        FROM place
+                        WHERE ST_DWithin(lonlat, ST_GeogFromText(?))""")
                 .param(bounds.toText())
                 .query(rowMapper)
                 .list();

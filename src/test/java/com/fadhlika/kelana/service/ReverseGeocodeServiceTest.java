@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.locationtech.jts.geom.Coordinate;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -73,7 +74,8 @@ public class ReverseGeocodeServiceTest {
                                 .thenReturn(Optional.of(l))
                                 .thenReturn(Optional.empty());
 
-                when(placeRepository.fetchPlaces(l.getLonlat().buffer(100))).thenReturn(new ArrayList<>());
+                Coordinate coord = l.getLonlat().getCoordinate();
+                when(placeRepository.fetchPlaces(coord.x, coord.y, 10.0)).thenReturn(new ArrayList<>());
 
                 when(photonRepository.reverseGeocode(-6.1754, 106.8272)).thenReturn(
                                 new FeatureCollection(
