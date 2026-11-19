@@ -15,6 +15,7 @@ import org.locationtech.jts.io.WKBReader;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import tools.jackson.databind.ObjectMapper;
 
@@ -74,28 +75,26 @@ public class PlaceRepository {
     }
 
     public Place createPlace(Place place) throws JsonProcessingException {
-        var keyHolder = new GeneratedKeyHolder();
+        KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcClient
-                .sql(
-                        """
-                                INSERT INTO place(
-                                    provider,
-                                    lonlat,
-                                    type,
-                                    postcode,
-                                    country_code,
-                                    name,
-                                    country,
-                                    city,
-                                    district,
-                                    locality,
-                                    street,
-                                    state,
-                                    geodata,
-                                    created_at
-                                ) VALUES (?, ST_GeogFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::json, ?)
-                                ON CONFLICT
-                                DO NOTHING RETURNING id""")
+                .sql("""
+                        INSERT INTO place(
+                            provider,
+                            lonlat,
+                            type,
+                            postcode,
+                            country_code,
+                            name,
+                            country,
+                            city,
+                            district,
+                            locality,
+                            street,
+                            state,
+                            geodata,
+                            created_at
+                        ) VALUES (?, ST_GeogFromText(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::json, ?)
+                        ON CONFLICT ((geodata->'properties'->'osm_id'::TEXT)) DO NOTHING RETURNING id""")
                 .param(place.provider())
                 .param(place.lonlat().toText())
                 .param(place.type())
@@ -112,56 +111,54 @@ public class PlaceRepository {
                 .param(place.createdAt().toOffsetDateTime())
                 .update(keyHolder);
 
-        return fetchPlace(keyHolder.getKeyAs(Long.class)).orElseThrow();
+        return fetchPlace(keyHolder.getKeyAs(Integer.class)).orElseThrow();
     }
 
     public Optional<Place> fetchPlace(Geometry lonlat) {
         return jdbcClient
-                .sql(
-                        """
-                                SELECT
-                                    id,
-                                    provider,
-                                    type,
-                                    postcode,
-                                    country_code,
-                                    name,
-                                    country,
-                                    city,
-                                    district,
-                                    locality,
-                                    street,
-                                    state,
-                                    ST_AsBinary(lonlat) AS lonlat,
-                                    geodata,
-                                    created_at
-                                FROM place WHERE ST_AsText(lonlat) =  ?""")
+                .sql("""
+                        SELECT
+                            id,
+                            provider,
+                            type,
+                            postcode,
+                            country_code,
+                            name,
+                            country,
+                            city,
+                            district,
+                            locality,
+                            street,
+                            state,
+                            ST_AsBinary(lonlat) AS lonlat,
+                            geodata,
+                            created_at
+                        FROM place WHERE ST_AsText(lonlat) =  ?""")
                 .param(lonlat.toText())
                 .query(rowMapper)
                 .optional();
     }
 
-    public Optional<Place> fetchPlace(Long id) {
+    public Optional<Place> fetchPlace(Integer id) {
         return jdbcClient
-                .sql(
-                        """
-                                SELECT
-                                    id,
-                                    provider,
-                                    type,
-                                    postcode,
-                                    country_code,
-                                    name,
-                                    country,
-                                    city,
-                                    district,
-                                    locality,
-                                    street,
-                                    state,
-                                    ST_AsBinary(lonlat) AS lonlat,
-                                    geodata,
-                                    created_at
-                                FROM place WHERE id =  ?""")
+                .sql("""
+                        SELECT
+                            id,
+                            provider,
+                            type,
+                            postcode,
+                            country_code,
+                            name,
+                            country,
+                            city,
+                            district,
+                            locality,
+                            street,
+                            state,
+                            ST_AsBinary(lonlat) AS lonlat,
+                            geodata,
+                            created_at
+                        FROM place WHERE id =  ?""")
                 .param(id)
                 .query(rowMapper)
                 .optional();

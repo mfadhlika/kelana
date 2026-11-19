@@ -23,9 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fadhlika.kelana.dto.Feature;
 import com.fadhlika.kelana.dto.FeatureCollection;
+import com.fadhlika.kelana.dto.PlaceProperties;
 import com.fadhlika.kelana.dto.PointProperties;
 import com.fadhlika.kelana.dto.Response;
 import com.fadhlika.kelana.model.Location;
+import com.fadhlika.kelana.model.Place;
 import com.fadhlika.kelana.model.User;
 import com.fadhlika.kelana.service.LocationService;
 
@@ -62,6 +64,24 @@ public class LocationController {
 
                 List<Feature> features = this.locationService.findLocations(user.getId(), start,
                                 end, device, order, desc, offset, limit, rect).stream().map(curr -> {
+                                        Feature p = null;
+                                        if (curr.getPlace() != null) {
+                                                Place place = curr.getPlace();
+                                                PlaceProperties placeProperties = new PlaceProperties(
+                                                                place.type(),
+                                                                place.postcode(),
+                                                                place.countryCode(),
+                                                                place.name(),
+                                                                place.country(),
+                                                                place.city(),
+                                                                place.district(),
+                                                                place.locality(),
+                                                                place.street(),
+                                                                place.state());
+
+                                                p = new Feature(place.lonlat(), placeProperties);
+                                        }
+
                                         PointProperties props = new PointProperties(
                                                         curr.getTimestamp(),
                                                         curr.getAltitude(),
@@ -76,7 +96,7 @@ public class LocationController {
                                                         curr.getPressure(),
                                                         curr.getDeviceId(),
                                                         curr.getSsid(),
-                                                        curr.getGeocode(),
+                                                        p,
                                                         curr.getRawData());
                                         return new Feature(curr.getLonlat(), props);
                                 }).toList();
@@ -93,6 +113,23 @@ public class LocationController {
                         Location location = this.locationService.findLocation(user.getId(), Optional.empty(),
                                         Optional.empty(), device, Optional.empty(), Optional.of(true)).orElseThrow();
 
+                        Feature p = null;
+                        if (location.getPlace() != null) {
+                                Place place = location.getPlace();
+                                PlaceProperties placeProperties = new PlaceProperties(
+                                                place.type(),
+                                                place.postcode(),
+                                                place.countryCode(),
+                                                place.name(),
+                                                place.country(),
+                                                place.city(),
+                                                place.district(),
+                                                place.locality(),
+                                                place.street(),
+                                                place.state());
+                                p = new Feature(place.lonlat(), placeProperties);
+                        }
+
                         PointProperties props = new PointProperties(
                                         location.getTimestamp(),
                                         location.getAltitude(),
@@ -107,7 +144,7 @@ public class LocationController {
                                         location.getPressure(),
                                         location.getDeviceId(),
                                         location.getSsid(),
-                                        location.getGeocode(),
+                                        p,
                                         location.getRawData());
 
                         Feature feature = new Feature(location.getLonlat(), props);

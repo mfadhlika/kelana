@@ -77,10 +77,10 @@ public class ReverseGeocodeService {
                 Coordinate coord = l.getLonlat().getCoordinate();
                 try {
                     List<Place> places = placeRepository.fetchPlaces(
-                            (Double) coord.x, (Double) coord.y, (Double) 10.0);
+                            (Double) coord.x, (Double) coord.y, (Double) 100.0);
                     Optional<Place> place = places.stream().findFirst();
 
-                    if (places.isEmpty()) {
+                    if (place.isEmpty()) {
                         FeatureCollection geocode = photonRepository.reverseGeocode(
                                 coord.y,
                                 coord.x);

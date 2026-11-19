@@ -81,6 +81,7 @@ public class Location {
     private ZonedDateTime createdAt;
     private FeatureCollection geocode;
     private Integer placeId;
+    private Place place;
 
     public Location(Geometry point) {
         this.lonlat = point;
@@ -302,5 +303,13 @@ public class Location {
 
     public void setPlaceId(Integer value) {
         this.placeId = value;
+    }
+
+    public Place getPlace() {
+        return place;
+    }
+
+    public void setPlace(Place value) {
+        this.place = value;
     }
 }

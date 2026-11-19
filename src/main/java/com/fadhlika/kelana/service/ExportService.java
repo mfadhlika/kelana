@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 
 import com.fadhlika.kelana.dto.Feature;
 import com.fadhlika.kelana.dto.FeatureCollection;
+import com.fadhlika.kelana.dto.PlaceProperties;
 import com.fadhlika.kelana.dto.PointProperties;
 import com.fadhlika.kelana.exception.InternalErrorException;
 import com.fadhlika.kelana.model.Export;
+import com.fadhlika.kelana.model.Place;
 import com.fadhlika.kelana.repository.ExportRepository;
 import tools.jackson.databind.ObjectMapper;
 
@@ -65,6 +67,24 @@ public class ExportService {
         try {
             List<Feature> features = locationService.findLocations(export.userId(), export.startAt(), export.endAt())
                     .stream().map((location) -> {
+                        Feature p = null;
+                        if (location.getPlace() != null) {
+                            Place place = location.getPlace();
+                            PlaceProperties placeProperties = new PlaceProperties(
+                                    place.type(),
+                                    place.postcode(),
+                                    place.countryCode(),
+                                    place.name(),
+                                    place.country(),
+                                    place.city(),
+                                    place.district(),
+                                    place.locality(),
+                                    place.street(),
+                                    place.state());
+
+                            p = new Feature(place.lonlat(), placeProperties);
+                        }
+
                         PointProperties props = new PointProperties(
                                 location.getTimestamp(),
                                 location.getAltitude(),
@@ -79,7 +99,7 @@ public class ExportService {
                                 location.getPressure(),
                                 location.getDeviceId(),
                                 location.getSsid(),
-                                location.getGeocode(),
+                                p,
                                 location.getRawData());
 
                         return new Feature(location.getLonlat(), props);

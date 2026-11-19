@@ -19,7 +19,7 @@ public record PointProperties(
                 Double pressure,
                 String deviceId,
                 String ssid,
-                FeatureCollection geocode,
+                Feature place,
                 String rawData) {
 
 }

@@ -4,9 +4,11 @@
  */
 package com.fadhlika.kelana.repository;
 
-import com.fadhlika.kelana.dto.FeatureCollection;
+import com.fadhlika.kelana.dto.Feature;
 import com.fadhlika.kelana.model.Location;
+import com.fadhlika.kelana.model.Place;
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.io.InputStream;
 import java.sql.*;
 import java.time.OffsetDateTime;
@@ -16,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
@@ -49,13 +52,13 @@ public class LocationRepository {
         @Override
         public Location mapRow(ResultSet rs, int rowNum)
                 throws SQLException {
-            Location location;
-            byte[] point = rs.getBytes("lonlat");
+            Geometry geom;
             try {
-                location = new Location(wkbReader.read(point));
+                geom = wkbReader.read(rs.getBytes("location_lonlat"));
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
+            Location location = new Location(geom);
             location.setId(rs.getInt("id"));
             location.setDeviceId(rs.getString("device_id"));
             location.setAltitude(rs.getInt("altitude"));
@@ -76,7 +79,7 @@ public class LocationRepository {
                     rs
                             .getObject("created_at", OffsetDateTime.class)
                             .toZonedDateTime());
-            location.setRawData(rs.getString("raw_data"));
+            location.setRawData(rs.getString("location_raw_data"));
 
             Array motions = rs.getArray("motions");
             if (motions != null)
@@ -85,15 +88,46 @@ public class LocationRepository {
                                 .map(e -> e)
                                 .toList());
 
-            InputStream geocode = rs.getAsciiStream("geocode");
-            if (geocode != null) {
+            int placeId = rs.getInt("place_id");
+            if (placeId > 0) {
                 try {
-                    location.setGeocode(
-                            mapper.readValue(geocode, FeatureCollection.class));
-                } catch (Exception e) {
+                    byte[] lonlat = rs.getBytes("place_lonlat");
+                    if (lonlat != null) {
+                        geom = wkbReader.read(lonlat);
+                    }
+                } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
+
+                Feature placeFeature = null;
+                InputStream geodata = rs.getAsciiStream("geodata");
+                if (geodata != null) {
+                    try {
+                        placeFeature = mapper.readValue(geodata, Feature.class);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                Place place = new Place(
+                        rs.getInt("place_id"),
+                        rs.getString("provider"),
+                        geom,
+                        rs.getString("type"),
+                        rs.getString("postcode"),
+                        rs.getString("country_code"),
+                        rs.getString("name"),
+                        rs.getString("country"),
+                        rs.getString("city"),
+                        rs.getString("district"),
+                        rs.getString("locality"),
+                        rs.getString("street"),
+                        rs.getString("state"),
+                        placeFeature,
+                        rs.getObject("created_at", OffsetDateTime.class).toZonedDateTime());
+
+                location.setPlace(place);
             }
+
             return location;
         }
     };
@@ -109,52 +143,48 @@ public class LocationRepository {
         if (location.getId() != 0) {
             sqlBuilder.append("id, ");
         }
-        sqlBuilder.append(
-                """
-                        user_id,
-                        device_id,
-                        lonlat,
-                        altitude,
-                        course,
-                        course_accuracy,
-                        speed,
-                        accuracy,
-                        vertical_accuracy,
-                        motions,
-                        battery_state,
-                        battery,
-                        pressure,
-                        ssid,
-                        timestamp,
-                        raw_data,
-                        created_at,
-                        import_id,
-                        geocode) VALUES(""");
+        sqlBuilder.append("""
+                user_id,
+                device_id,
+                lonlat,
+                altitude,
+                course,
+                course_accuracy,
+                speed,
+                accuracy,
+                vertical_accuracy,
+                motions,
+                battery_state,
+                battery,
+                pressure,
+                ssid,
+                timestamp,
+                raw_data,
+                created_at,
+                import_id) VALUES(""");
         if (location.getId() != 0) {
             sqlBuilder.append(":id, ");
         }
-        sqlBuilder.append(
-                """
-                        :user_id, :device_id, ST_GeogFromText(:lonlat), :altitude, :course, :course_accuracy,
-                        :speed, :accuracy, :vertical_accuracy, :motions::text[], :battery_state, :battery, :pressure,
-                        :ssid, :timestamp, :raw_data::json, :created_at, :import_id, :geocode::json)
-                        ON CONFLICT (user_id, device_id, lonlat, timestamp) DO UPDATE SET
-                                    altitude = excluded.altitude,
-                                    course = excluded.course,
-                                    course_accuracy = excluded.course_accuracy,
-                                    speed = excluded.speed,
-                                    accuracy = excluded.accuracy,
-                                    vertical_accuracy = excluded.vertical_accuracy,
-                                    motions = excluded.motions,
-                                    battery_state = excluded.battery_state,
-                                    battery = excluded.battery,
-                                    pressure = excluded.pressure,
-                                    ssid = excluded.ssid,
-                                    raw_data = excluded.raw_data,
-                                    created_at = excluded.created_at,
-                                    import_id = excluded.import_id,
-                                    geocode = excluded.geocode
-                                """);
+        sqlBuilder.append("""
+                :user_id, :device_id, ST_GeogFromText(:lonlat), :altitude, :course, :course_accuracy,
+                :speed, :accuracy, :vertical_accuracy, :motions::text[], :battery_state, :battery, :pressure,
+                :ssid, :timestamp, :raw_data::json, :created_at, :import_id)
+                ON CONFLICT (user_id, device_id, lonlat, timestamp) DO UPDATE SET
+                            altitude = excluded.altitude,
+                            course = excluded.course,
+                            course_accuracy = excluded.course_accuracy,
+                            speed = excluded.speed,
+                            accuracy = excluded.accuracy,
+                            vertical_accuracy = excluded.vertical_accuracy,
+                            motions = excluded.motions,
+                            battery_state = excluded.battery_state,
+                            battery = excluded.battery,
+                            pressure = excluded.pressure,
+                            ssid = excluded.ssid,
+                            raw_data = excluded.raw_data,
+                            created_at = excluded.created_at,
+                            import_id = excluded.import_id
+                        """);
 
         StatementSpec stmt = jdbcClient.sql(sqlBuilder.toString());
         if (location.getId() > 0) {
@@ -267,34 +297,34 @@ public class LocationRepository {
         HashMap<String, Object> args = new HashMap<String, Object>();
 
         id.ifPresent(v -> {
-            where.add("id = :id");
+            where.add("location.id = :id");
             args.put("id", v);
         });
 
         userId.ifPresent(v -> {
-            where.add("user_id = :user_id");
+            where.add("location.user_id = :user_id");
             args.put("user_id", v);
         });
 
         if (start.isPresent() && end.isPresent()) {
-            where.add("timestamp BETWEEN :start AND :end");
+            where.add("location.timestamp BETWEEN :start AND :end");
             args.put("start", start.get().toOffsetDateTime());
             args.put("end", end.get().toOffsetDateTime());
         } else if (start.isPresent()) {
-            where.add("timestamp < :timestamp");
+            where.add("location.timestamp < :timestamp");
             args.put("timestamp", start.get());
         }
 
         device.ifPresent(d -> {
-            where.add("device_id = :device_id");
+            where.add("location.device_id = :device_id");
             args.put("device_id", d);
         });
 
         geocoded.ifPresent(v -> {
             if (v)
-                where.add("geocode IS NOT NULL OR geocode != 'null'");
+                where.add("location.place_id IS NOT NULL");
             else
-                where.add("geocode IS NULL OR geocode = 'null'");
+                where.add("location.place_id IS NULL");
         });
 
         bounds.ifPresent(b -> {
@@ -302,36 +332,51 @@ public class LocationRepository {
             args.put("bounds", b.toText());
         });
 
-        StringBuilder sqlBuilder = new StringBuilder(
-                """
-                        SELECT
-                            id,
-                            user_id,
-                            device_id,
-                            ST_AsBinary(lonlat) AS lonlat,
-                            altitude,
-                            course,
-                            speed,
-                            accuracy,
-                            vertical_accuracy,
-                            motions,
-                            battery_state,
-                            battery,
-                            pressure,
-                            ssid,
-                            raw_data::json AS raw_data,
-                            timestamp,
-                            created_at,
-                            import_id,
-                            course_accuracy,
-                            geocode::json AS geocode FROM location""");
+        StringBuilder sqlBuilder = new StringBuilder("""
+                SELECT
+                    location.id,
+                    location.user_id,
+                    location.device_id,
+                    ST_AsBinary(location.lonlat) AS location_lonlat,
+                    location.altitude,
+                    location.course,
+                    location.speed,
+                    location.accuracy,
+                    location.vertical_accuracy,
+                    location.motions,
+                    location.battery_state,
+                    location.battery,
+                    location.pressure,
+                    location.ssid,
+                    location.raw_data::json AS location_raw_data,
+                    location.timestamp,
+                    location.created_at,
+                    location.import_id,
+                    location.course_accuracy,
+                    location.place_id,
+                    place.provider,
+                    place.type,
+                    place.postcode,
+                    place.country_code,
+                    place.name,
+                    place.country,
+                    place.city,
+                    place.district,
+                    place.locality,
+                    place.street,
+                    place.state,
+                    ST_AsBinary(place.lonlat) AS place_lonlat,
+                    place.geodata,
+                    place.created_at
+                FROM location
+                LEFT JOIN place ON location.place_id = place.id""");
         if (!where.isEmpty()) {
             sqlBuilder.append(" WHERE ");
             sqlBuilder.append(String.join(" AND ", where));
         }
 
         sqlBuilder.append(" ORDER BY ");
-        sqlBuilder.append(order.orElse("timestamp"));
+        sqlBuilder.append(order.orElse("location.timestamp"));
 
         desc.ifPresent(v -> {
             if (v)
@@ -352,15 +397,6 @@ public class LocationRepository {
                 .sql(sqlBuilder.toString())
                 .params(args)
                 .query(locationRowMapper);
-    }
-
-    public void updateGeocode(int id, FeatureCollection geocode)
-            throws JsonProcessingException {
-        jdbcClient
-                .sql("UPDATE location SET geocode = ?::jsonb WHERE id = ?")
-                .param(mapper.writeValueAsString(geocode))
-                .param(id)
-                .update();
     }
 
     public void updatePlace(int id, int placeId)

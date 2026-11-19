@@ -18,11 +18,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fadhlika.kelana.dto.Feature;
+import com.fadhlika.kelana.dto.PlaceProperties;
 import com.fadhlika.kelana.dto.PointProperties;
 import com.fadhlika.kelana.exception.InternalErrorException;
 import com.fadhlika.kelana.model.Location;
 import com.fadhlika.kelana.model.User;
 import com.fadhlika.kelana.model.Location.BatteryState;
+import com.fadhlika.kelana.model.Place;
 import com.fadhlika.kelana.repository.LocationRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -125,6 +127,25 @@ public class LocationService {
         String bs = BatteryState.UNKNOWN.toString();
         if (location.getBatteryState() != null)
             bs = location.getBatteryState().toString();
+
+        Feature p = null;
+        if (location.getPlace() != null) {
+            Place place = location.getPlace();
+            PlaceProperties placeProperties = new PlaceProperties(
+                    place.type(),
+                    place.postcode(),
+                    place.countryCode(),
+                    place.name(),
+                    place.country(),
+                    place.city(),
+                    place.district(),
+                    place.locality(),
+                    place.street(),
+                    place.state());
+
+            p = new Feature(place.lonlat(), placeProperties);
+        }
+
         PointProperties props = new PointProperties(
                 location.getTimestamp(),
                 location.getAltitude(),
@@ -139,7 +160,7 @@ public class LocationService {
                 location.getPressure(),
                 location.getDeviceId(),
                 location.getSsid(),
-                location.getGeocode(),
+                p,
                 location.getRawData());
 
         User user = userService.getUserByUserId(location.getUserId());
