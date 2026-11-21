@@ -36,7 +36,7 @@ import {
   PlaneTakeoff,
   PlaneLanding,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   formatDistanceToNow,
 } from "date-fns";
@@ -217,7 +217,7 @@ export function MapLayers({
         prevVisit.endAt = new Date(cur.properties.timestamp);
         if (
           prevVisit.name !==
-            cur.properties.geocode?.features.at(0)?.properties?.name &&
+          cur.properties.geocode?.features.at(0)?.properties?.name &&
           (cur.properties.speed ?? 0) === 0 &&
           !cur.properties.motions?.includes("automotive")
         ) {
@@ -301,11 +301,14 @@ export function MapLayers({
     );
   }, [locations]);
 
+  const featureGroupRefs = useRef<Array<L.FeatureGroup | null>>(new Array(groupped.length));
+
   return (
     <>
-      {showTimeline && <Timeline visits={visits} />}
+      {showTimeline && <Timeline visits={visits} featureGroupRefs={featureGroupRefs} />}
       {groupped.map((group, groupIndex) => (
         <FeatureGroup
+          ref={ref => { featureGroupRefs.current[groupIndex] = ref; }}
           key={groupIndex}
           eventHandlers={{
             mouseover: (e) => {

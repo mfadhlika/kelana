@@ -14,7 +14,7 @@ type PointProperties = {
     deviceId: string,
     ssid?: string,
     rawData: string,
-    geocode?: FeatureCollection<Point, GeocodeProperties>
+    geocode?: FeatureCollection<Point, PlaceProperties>
 };
 
 type LineStringProperties = {
@@ -37,7 +37,7 @@ type TripProperties = {
     publicUrl?: string
 }
 
-type GeocodeProperties = {
+type PlaceProperties = {
     postcode: string,
     name: string,
     country: string,
@@ -56,4 +56,4 @@ type RegionProperties = {
     beaconMinor?: number
 }
 
-export type { PointProperties, LineStringProperties, TripProperties, RegionProperties };
+export type { PointProperties, LineStringProperties, TripProperties, RegionProperties, PlaceProperties };
